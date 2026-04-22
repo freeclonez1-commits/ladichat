@@ -21,7 +21,7 @@
     },
     // 🔒 Token Telegram đã được chuyển sang Cloudflare Worker (không lò ra ở đây)
     // Sau khi deploy worker, thay URL này bằng URL worker của bạn:
-    notifyUrl: 'https://nk-notify.YOUR_NAME.workers.dev/notify',
+    notifyUrl: 'https://nk-notify.freeclonez1.workers.dev',
     brandName: 'Support Nike',
     brandSub: 'Thường trả lời trong vài phút',
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
