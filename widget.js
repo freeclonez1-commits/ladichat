@@ -7,7 +7,7 @@
   'use strict';
 
   // ===================================================
-  // ⚙️  CONFIG — Chỉ sửa ở đây
+  // ⚩️  CONFIG — Chỉ sửa ở đây
   // ===================================================
   var CFG = {
     firebase: {
@@ -19,8 +19,9 @@
       messagingSenderId: "318435093664",
       appId: "1:318435093664:web:f8f3f68da5c4da352fadc5"
     },
-    tgToken: '7890410484:AAHxMwViGPM-nmuG_U2sHjwF_7Ajs2VA0T0',
-    tgChatId: '6843744862',
+    // 🔒 Token Telegram đã được chuyển sang Cloudflare Worker (không lò ra ở đây)
+    // Sau khi deploy worker, thay URL này bằng URL worker của bạn:
+    notifyUrl: 'https://nk-notify.YOUR_NAME.workers.dev/notify',
     brandName: 'Support Nike',
     brandSub: 'Thường trả lời trong vài phút',
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
@@ -312,9 +313,11 @@
   }
 
   function nkTg(text) {
-    fetch('https://api.telegram.org/bot' + CFG.tgToken + '/sendMessage', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ chat_id: CFG.tgChatId, text: 'Nike Chat\n---\n' + text })
+    if (!CFG.notifyUrl || CFG.notifyUrl.includes('YOUR_NAME')) return; // chưa cài worker
+    fetch(CFG.notifyUrl, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ text: text })
     }).catch(function(){});
   }
 
