@@ -168,6 +168,14 @@
       startBtn:'Start conversation', inputPh:'Type a message...',
       seen:'✓ Seen', sent:'✓ Sent',
       welcome: function(n){ return 'Hi '+n+'! Thank you for your interest in Nike. How can we help you?'; }
+    },
+    th: {
+      obTitle:'แชทกับ Nike', obSub:'สวัสดี! กรุณากรอกข้อมูลเพื่อให้เราช่วยเหลือคุณได้ดียิ่งขึ้น',
+      nameLabel:'ชื่อของคุณ', namePh:'เช่น สมชาย ใจดี',
+      phoneLabel:'หมายเลขโทรศัพท์', phonePh:'เช่น 0812345678',
+      startBtn:'เริ่มการสนทนา', inputPh:'พิมพ์ข้อความ...',
+      seen:'✓ เห็นแล้ว', sent:'✓ ส่งแล้ว',
+      welcome: function(n){ return 'สวัสดี '+n+'! ขอบคุณที่สนใจ Nike มีอะไรให้ช่วยไหมครับ?'; }
     }
   };
   NK.lp = LANG.vi; // default
