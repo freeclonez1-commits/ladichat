@@ -510,23 +510,25 @@ function sendReply() {
 // =============================================
 // ⚡ QUICK REPLIES MANAGEMENT
 // =============================================
+var _qrEntries = []; // lưu để edit theo index
+
 function loadQrList() {
   db.ref('nike-chat/quickReplies').on('value', (snap) => {
     const data = snap.val() || {};
     const container = document.getElementById('qr-list');
-    const entries = Object.entries(data).filter(([k,v]) => v && v.question);
+    _qrEntries = Object.entries(data).filter(([k,v]) => v && v.question);
 
-    if (!entries.length) {
+    if (!_qrEntries.length) {
       container.innerHTML = '<div style="font-size:13px;color:#bbb;text-align:center;padding:12px 0;">Chưa có câu hỏi nào. Thêm bên trên nhé!</div>';
       return;
     }
 
-    container.innerHTML = entries.map(([key, item]) => `
+    container.innerHTML = _qrEntries.map(([key, item], idx) => `
       <div class="qr-item">
         <div class="qr-item-q">❓ ${escHtml(item.question)}</div>
         <div class="qr-item-a">💬 ${escHtml(item.answer || '(chưa có câu trả lời)')}</div>
         <div class="qr-item-actions">
-          <button class="qr-item-edit" onclick="editQuickReply('${key}', ${JSON.stringify(item.question).replace(/'/g,"\\'")}, ${JSON.stringify(item.answer||'').replace(/'/g,"\\'")})">✏️ Sửa</button>
+          <button class="qr-item-edit" onclick="editQuickReply(${idx})">✏️ Sửa</button>
           <button class="qr-item-del" onclick="deleteQuickReply('${key}')">🗑 Xóa</button>
         </div>
       </div>`).join('');
@@ -550,10 +552,12 @@ function addQuickReply() {
 
 var editingQrKey = null;
 
-function editQuickReply(key, question, answer) {
-  editingQrKey = key;
-  document.getElementById('qr-new-q').value = question;
-  document.getElementById('qr-new-a').value = answer;
+function editQuickReply(idx) {
+  var entry = _qrEntries[idx];
+  if (!entry) return;
+  editingQrKey = entry[0];
+  document.getElementById('qr-new-q').value = entry[1].question;
+  document.getElementById('qr-new-a').value = entry[1].answer || '';
   document.getElementById('qr-add-btn').textContent = '✓ Cập nhật';
   document.getElementById('qr-cancel-btn').style.display = 'block';
   document.getElementById('qr-new-q').focus();

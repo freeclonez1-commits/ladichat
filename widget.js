@@ -59,7 +59,7 @@
     '#nk-tip{position:fixed;bottom:100px;right:28px;background:#111;color:#fff;padding:10px 18px;border-radius:22px;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.2);z-index:2147483645;pointer-events:none;line-height:1.4;opacity:0;transform:translateY(10px) scale(.94);transition:opacity .3s,transform .3s}',
     '#nk-tip.show{opacity:1;transform:translateY(0) scale(1)}',
     '#nk-tip::after{content:"";position:absolute;bottom:-7px;right:22px;border:7px solid transparent;border-top-color:#111;border-bottom:0}',
-    '#nk-box{position:fixed;bottom:95px;right:28px;width:370px;height:460px;max-height:calc(100vh - 140px);background:#fff;border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,.16);z-index:2147483644;display:flex;flex-direction:column;overflow:hidden;transform:scale(.92) translateY(24px);transform-origin:bottom right;opacity:0;pointer-events:none;transition:all .38s cubic-bezier(.23,1,.32,1)}',
+    '#nk-box{position:fixed;bottom:95px;right:28px;width:330px;height:500px;max-height:calc(100vh - 140px);background:#fff;border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,.16);z-index:2147483644;display:flex;flex-direction:column;overflow:hidden;transform:scale(.92) translateY(24px);transform-origin:bottom right;opacity:0;pointer-events:none;transition:all .38s cubic-bezier(.23,1,.32,1)}',
     '#nk-box.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}',
     '@media(max-width:480px){#nk-box{right:8px;bottom:80px;width:calc(100vw - 16px);height:60vh;max-height:520px;border-radius:16px}#nk-tip{right:8px}#nk-btn,#nk-pulse{right:18px;bottom:18px}}',
     '#nk-hd{background:#111;color:#fff;padding:18px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}',
@@ -339,18 +339,23 @@
   // D\u00f9ng index thay v\u00ec truy\u1ec1n string tr\u1ef1c ti\u1ebfp \u0111\u1ec3 tr\u00e1nh l\u1ed7i HTML double-quote
   window.__nkQR = function(idx) {
     var item = NK.qrData && NK.qrData[idx];
-    if (!item) return;
+    if (!item || !NK.db || !NK.sessionId) return;
     var q = item.question || item.text;
     var a = item.answer || null;
-    var inp = document.getElementById('nk-inp');
-    if (!inp) return;
-    inp.value = q;
-    inp.focus();
-    NK.pendingAnswer = a;
-    window.__nkResize(inp);
-    inp.style.borderColor = '#111';
-    inp.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
-    setTimeout(function() { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
+    // Ẩn QR ngay
+    var qr = document.getElementById('nk-qr');
+    if (qr) qr.style.display = 'none';
+    // Gửi câu hỏi ngay lập tức
+    NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'customer', text: q, timestamp: Date.now() });
+    NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: q, lastMessageAt: Date.now(), unread: true });
+    nkTg('\uD83D\uDCAC ' + (localStorage.getItem('nk_chat_name') || 'Khách') + ': ' + q);
+    // Tự trả lời sau 1s nếu có answer
+    if (a) {
+      setTimeout(function() {
+        NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'admin', text: a, timestamp: Date.now() });
+        NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: '[Admin] ' + a, lastMessageAt: Date.now(), unreadCustomer: true });
+      }, 1000);
+    }
   };
 
   window.__nkShowQR = function() {
