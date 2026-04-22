@@ -38,7 +38,9 @@
     db: null,
     sessionId: null,
     isOpen: false,
-    unread: 0
+    unread: 0,
+    pendingAnswer: null,
+    qrData: []  // lưu dữ liệu quick replies để tránh lỗi JSON quote trong onclick
   };
 
   // ===== 1. INJECT CSS =====
@@ -57,9 +59,9 @@
     '#nk-tip{position:fixed;bottom:100px;right:28px;background:#111;color:#fff;padding:10px 18px;border-radius:22px;font-size:13px;font-weight:500;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.2);z-index:2147483645;pointer-events:none;line-height:1.4;opacity:0;transform:translateY(10px) scale(.94);transition:opacity .3s,transform .3s}',
     '#nk-tip.show{opacity:1;transform:translateY(0) scale(1)}',
     '#nk-tip::after{content:"";position:absolute;bottom:-7px;right:22px;border:7px solid transparent;border-top-color:#111;border-bottom:0}',
-    '#nk-box{position:fixed;bottom:105px;right:28px;width:370px;height:580px;max-height:calc(100vh - 140px);background:#fff;border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,.16);z-index:2147483644;display:flex;flex-direction:column;overflow:hidden;transform:scale(.92) translateY(24px);transform-origin:bottom right;opacity:0;pointer-events:none;transition:all .38s cubic-bezier(.23,1,.32,1)}',
+    '#nk-box{position:fixed;bottom:105px;right:28px;width:370px;height:560px;max-height:calc(100vh - 140px);background:#fff;border-radius:20px;box-shadow:0 16px 48px rgba(0,0,0,.16);z-index:2147483644;display:flex;flex-direction:column;overflow:hidden;transform:scale(.92) translateY(24px);transform-origin:bottom right;opacity:0;pointer-events:none;transition:all .38s cubic-bezier(.23,1,.32,1)}',
     '#nk-box.open{transform:scale(1) translateY(0);opacity:1;pointer-events:all}',
-    '@media(max-width:480px){#nk-box{right:8px;bottom:90px;width:calc(100vw - 16px);height:calc(100vh - 106px);max-height:none;border-radius:18px}#nk-tip{right:8px}#nk-btn,#nk-pulse{right:18px;bottom:18px}}',
+    '@media(max-width:480px){#nk-box{right:8px;bottom:80px;width:calc(100vw - 16px);height:60vh;max-height:520px;border-radius:16px}#nk-tip{right:8px}#nk-btn,#nk-pulse{right:18px;bottom:18px}}',
     '#nk-hd{background:#111;color:#fff;padding:18px 20px;display:flex;align-items:center;gap:12px;flex-shrink:0}',
     '#nk-hd img{width:38px;filter:invert(1);display:block}',
     '#nk-hi{flex:1;min-width:0}',
@@ -255,16 +257,21 @@
   };
 
   // Quick Reply: fill v\u00e0o input, l\u01b0u c\u00e2u tr\u1ea3 l\u1eddi ch\u1edd g\u1eedi
-  window.__nkQR = function(q, a) {
+  // D\u00f9ng index thay v\u00ec truy\u1ec1n string tr\u1ef1c ti\u1ebfp \u0111\u1ec3 tr\u00e1nh l\u1ed7i HTML double-quote
+  window.__nkQR = function(idx) {
+    var item = NK.qrData && NK.qrData[idx];
+    if (!item) return;
+    var q = item.question || item.text;
+    var a = item.answer || null;
     var inp = document.getElementById('nk-inp');
     if (!inp) return;
     inp.value = q;
     inp.focus();
-    NK.pendingAnswer = a || null; // l\u01b0u c\u00e2u tr\u1ea3 l\u1eddi \u0111\u1ec3 g\u1eedi sau khi user b\u1ea5m Send
+    NK.pendingAnswer = a;
     window.__nkResize(inp);
-    // Highlight input nh\u1eb9 \u0111\u1ec3 user bi\u1ebft \u0111\u00e3 fill
     inp.style.borderColor = '#111';
-    setTimeout(function() { inp.style.borderColor = ''; }, 1200);
+    inp.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
+    setTimeout(function() { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
   };
 
   window.__nkResize = function(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; };
@@ -313,10 +320,12 @@
       if (!data) { qr.style.display = 'none'; return; }
       var items = Object.values(data).filter(function(v) { return v && (v.question || v.text); });
       if (!items.length) { qr.style.display = 'none'; return; }
+      NK.qrData = items; // l\u01b0u v\u00e0o NK \u0111\u1ec3 __nkQR(idx) tra c\u1ee9u sau
       qr.style.display = 'flex';
-      qr.innerHTML = items.map(function(item) {
-        var q = item.question || item.text, a = item.answer || null;
-        return '<button class="nk-qb" onclick="__nkQR(' + JSON.stringify(q) + ',' + JSON.stringify(a) + ')">' + nkE(q) + '</button>';
+      qr.innerHTML = items.map(function(item, idx) {
+        var q = item.question || item.text;
+        // D\u00f9ng idx thay v\u00ec JSON.stringify(q) \u0111\u1ec3 tr\u00e1nh v\u1ee1 HTML attribute
+        return '<button class="nk-qb" onclick="__nkQR(' + idx + ')">' + nkE(q) + '</button>';
       }).join('');
     });
   }
