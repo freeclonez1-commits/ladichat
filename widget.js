@@ -154,28 +154,28 @@
   // Language packs
   var LANG = {
     vi: {
-      obTitle:'Chat với Nike', obSub:'Xin chào! Vui lòng cho biết thông tin để chúng tôi hỗ trợ bạn tốt hơn.',
-      nameLabel:'Tên của bạn', namePh:'Ví dụ: Nguyễn Văn A',
-      phoneLabel:'Số điện thoại', phonePh:'Ví dụ: 0912345678',
+      obTitle:'Chat với chúng tôi', obSub:'Xin chào! Vui lòng cho biết thông tin để chúng tôi hỗ trợ bạn tốt hơn.',
+      nameLabel:'Họ và tên', namePh:'Họ và tên',
+      phoneLabel:'Số điện thoại', phonePh:'Số điện thoại',
       startBtn:'Bắt đầu cuộc trò chuyện', inputPh:'Nhập tin nhắn...',
       seen:'✓ Đã xem', sent:'✓ Đã gửi',
-      welcome: function(n){ return 'Chào '+n+'! Cảm ơn bạn đã quan tâm đến Nike. Bạn cần tư vấn sản phẩm nào ạ?'; }
+      welcome: function(n){ return 'Chào '+n+'! Cảm ơn bạn đã liên hệ. Chúng tôi sẽ hỗ trợ bạn ngay!'; }
     },
     en: {
-      obTitle:'Chat with Nike', obSub:'Hello! Please share your info so we can assist you.',
-      nameLabel:'Your name', namePh:'e.g. John Smith',
-      phoneLabel:'Phone number', phonePh:'e.g. +84912345678',
+      obTitle:'Chat with us', obSub:'Hello! Please share your info so we can assist you.',
+      nameLabel:'Full name', namePh:'Full name',
+      phoneLabel:'Phone number', phonePh:'Phone number',
       startBtn:'Start conversation', inputPh:'Type a message...',
       seen:'✓ Seen', sent:'✓ Sent',
-      welcome: function(n){ return 'Hi '+n+'! Thank you for your interest in Nike. How can we help you?'; }
+      welcome: function(n){ return 'Hi '+n+'! Thank you for reaching out. We will assist you right away!'; }
     },
     th: {
-      obTitle:'แชทกับ Nike', obSub:'สวัสดี! กรุณากรอกข้อมูลเพื่อให้เราช่วยเหลือคุณได้ดียิ่งขึ้น',
-      nameLabel:'ชื่อของคุณ', namePh:'เช่น สมชาย ใจดี',
-      phoneLabel:'หมายเลขโทรศัพท์', phonePh:'เช่น 0812345678',
+      obTitle:'แชทกับเรา', obSub:'สวัสดี! กรุณากรอกข้อมูลเพื่อให้เราช่วยเหลือคุณได้ดียิ่งขึ้น',
+      nameLabel:'ชื่อ-นามสกุล', namePh:'ชื่อ-นามสกุล',
+      phoneLabel:'หมายเลขโทรศัพท์', phonePh:'หมายเลขโทรศัพท์',
       startBtn:'เริ่มการสนทนา', inputPh:'พิมพ์ข้อความ...',
       seen:'✓ เห็นแล้ว', sent:'✓ ส่งแล้ว',
-      welcome: function(n){ return 'สวัสดี '+n+'! ขอบคุณที่สนใจ Nike มีอะไรให้ช่วยไหมครับ?'; }
+      welcome: function(n){ return 'สวัสดี '+n+'! ขอบคุณที่ติดต่อเรา เราจะช่วยเหลือคุณทันที!'; }
     }
   };
   NK.lp = LANG.vi; // default
