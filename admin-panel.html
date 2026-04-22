@@ -9,7 +9,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 <style>
-:root{--c-bg:#f1f5f9;--c-surface:#fff;--c-side:#0f172a;--c-side2:#1e293b;--c-border:#e2e8f0;--c-text:#0f172a;--c-text2:#64748b;--c-text3:#94a3b8;--c-accent:#6366f1;--c-accent2:#4f46e5;--c-green:#22c55e;--c-red:#ef4444;--c-red2:#fee2e2;--r:10px;--font:'Inter',sans-serif}
+:root{--c-bg:#f5f5f5;--c-surface:#fff;--c-side:#000;--c-side2:#111;--c-border:#e8e8e8;--c-text:#111;--c-text2:#555;--c-text3:#999;--c-accent:#000;--c-accent2:#111;--c-green:#22c55e;--c-red:#fa5400;--c-red2:#fff5f0;--r:2px;--font:'Inter',sans-serif}
 *{box-sizing:border-box;margin:0;padding:0;font-family:var(--font)}
 body{background:var(--c-bg);height:100vh;overflow:hidden;color:var(--c-text);-webkit-font-smoothing:antialiased}
 button{cursor:pointer;font-family:var(--font)}
@@ -25,8 +25,8 @@ input,textarea,select{font-family:var(--font)}
 .login-box input{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:var(--r);padding:13px 16px;color:#fff;font-size:14px;outline:none;transition:.2s}
 .login-box input:focus{border-color:var(--c-accent);background:rgba(255,255,255,.1)}
 .login-box input::placeholder{color:var(--c-text3)}
-.login-box .btn-login{background:var(--c-accent);color:#fff;border:none;border-radius:var(--r);padding:13px;font-size:14px;font-weight:700;transition:.2s}
-.login-box .btn-login:hover{background:var(--c-accent2)}
+.login-box .btn-login{background:var(--c-surface);color:var(--c-text);border:none;border-radius:var(--r);padding:14px;font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;transition:.2s;width:100%}
+.login-box .btn-login:hover{background:var(--c-red);color:#fff}
 .login-error{color:#fca5a5;font-size:12px;min-height:16px}
 
 /* LAYOUT */
@@ -46,7 +46,7 @@ input,textarea,select{font-family:var(--font)}
 #sidebar-tabs{display:flex;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
 .stab{flex:1;padding:11px 4px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;color:var(--c-text3);border-bottom:2px solid transparent;transition:.2s;letter-spacing:.3px}
 .stab:hover{color:#fff}
-.stab.active{color:#fff;border-bottom-color:var(--c-accent)}
+.stab.active{color:#fff;border-bottom-color:var(--c-red)}
 
 /* SEARCH */
 #sidebar-search{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
@@ -60,7 +60,7 @@ input,textarea,select{font-family:var(--font)}
 #conv-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:4px}
 .conv-item{padding:12px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer;display:flex;align-items:center;gap:10px;transition:.15s;position:relative}
 .conv-item:hover{background:rgba(255,255,255,.05)}
-.conv-item.active{background:rgba(99,102,241,.15);border-left:3px solid var(--c-accent)}
+.conv-item.active{background:rgba(255,255,255,.08);border-left:3px solid var(--c-red)}
 .conv-avatar{width:40px;height:40px;border-radius:50%;background:rgba(99,102,241,.3);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
 .conv-info{flex:1;min-width:0}
 .conv-name{font-size:13px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -80,8 +80,8 @@ input,textarea,select{font-family:var(--font)}
 #qr-form input,#qr-form textarea{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:8px 11px;color:#fff;font-size:13px;outline:none;resize:none;line-height:1.4;transition:.2s}
 #qr-form input:focus,#qr-form textarea:focus{border-color:var(--c-accent);background:rgba(255,255,255,.1)}
 #qr-form input::placeholder,#qr-form textarea::placeholder{color:var(--c-text3)}
-#qr-add-btn{width:100%;padding:9px;background:var(--c-accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;transition:.2s}
-#qr-add-btn:hover{background:var(--c-accent2)}
+#qr-add-btn{width:100%;padding:9px;background:var(--c-surface);color:var(--c-text);border:none;border-radius:8px;font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;transition:.2s}
+#qr-add-btn:hover{background:var(--c-red);color:#fff}
 #qr-list{display:flex;flex-direction:column;gap:6px}
 .qr-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:11px}
 .qr-item-q{font-size:12px;font-weight:600;color:#e2e8f0;margin-bottom:3px}
@@ -104,9 +104,9 @@ input,textarea,select{font-family:var(--font)}
 .sf-color{display:flex;gap:8px;align-items:center}
 .sf-color input[type=color]{width:38px;height:36px;padding:2px;border-radius:6px;cursor:pointer;flex-shrink:0;border:1px solid rgba(255,255,255,.1)}
 .sf-color input[type=text]{flex:1}
-#settings-save{width:100%;padding:10px;background:var(--c-accent);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;transition:.2s}
-#settings-save:hover{background:var(--c-accent2)}
-#settings-save.saved{background:var(--c-green)}
+#settings-save{width:100%;padding:10px;background:var(--c-surface);color:var(--c-text);border:none;border-radius:8px;font-size:13px;font-weight:900;letter-spacing:1px;text-transform:uppercase;transition:.2s}
+#settings-save:hover{background:var(--c-red);color:#fff}
+#settings-save.saved{background:var(--c-green);color:#fff}
 
 /* CHAT AREA */
 #chat-area{flex:1;display:flex;flex-direction:column;background:var(--c-surface);overflow:hidden;min-width:0}
@@ -115,10 +115,13 @@ input,textarea,select{font-family:var(--font)}
 #chat-placeholder p{font-size:14px;font-weight:500}
 #chat-placeholder small{font-size:12px;opacity:.7}
 #chat-main{flex:1;display:none;flex-direction:column;background:#f8fafc;min-height:0}
-#chat-header{padding:14px 20px;background:var(--c-surface);border-bottom:1px solid var(--c-border);display:flex;align-items:center;gap:12px;flex-shrink:0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
-#chat-header-avatar{width:40px;height:40px;border-radius:50%;background:var(--c-accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:15px;flex-shrink:0}
-#chat-header-name{font-size:15px;font-weight:700;color:var(--c-text)}
-#chat-header-sub{font-size:12px;color:var(--c-text2);margin-top:1px}
+#chat-header{padding:14px 20px;background:var(--c-surface);border-bottom:3px solid var(--c-text);display:flex;align-items:center;gap:12px;flex-shrink:0}
+#chat-header-avatar{width:42px;height:42px;border-radius:50%;background:var(--c-text);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:16px;flex-shrink:0;text-transform:uppercase}
+.ch-info{flex:1;min-width:0}
+#chat-header-name{font-size:15px;font-weight:900;color:var(--c-text);letter-spacing:-.3px}
+#chat-header-sub{font-size:11px;color:var(--c-text2);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.ch-tag{background:var(--c-bg);color:var(--c-text2);font-size:10px;font-weight:700;padding:2px 7px;letter-spacing:.5px}
+.ch-ip{font-size:10px;color:var(--c-text3);font-family:monospace;background:#f0f0f0;padding:1px 6px}
 #chat-messages{flex:1;overflow-y:auto;padding:20px;display:flex;flex-direction:column;gap:12px;min-height:0}
 #chat-messages::-webkit-scrollbar{width:4px}
 #chat-messages::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:4px}
@@ -128,16 +131,16 @@ input,textarea,select{font-family:var(--font)}
 .msg-row>div{max-width:68%;display:flex;flex-direction:column}
 .msg-row.customer>div{align-items:flex-start}
 .msg-row.admin>div{align-items:flex-end}
-.msg-bubble{padding:10px 15px;border-radius:18px;font-size:14px;line-height:1.5;word-break:break-word}
-.msg-row.customer .msg-bubble{background:var(--c-surface);color:var(--c-text);border-bottom-left-radius:4px;border:1px solid var(--c-border);box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.msg-row.admin .msg-bubble{background:var(--c-accent);color:#fff;border-bottom-right-radius:4px}
+.msg-bubble{padding:10px 16px;border-radius:4px;font-size:14px;line-height:1.5;word-break:break-word}
+.msg-row.customer .msg-bubble{background:var(--c-surface);color:var(--c-text);border-bottom-left-radius:0;border:1px solid var(--c-border);box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.msg-row.admin .msg-bubble{background:var(--c-text);color:#fff;border-bottom-right-radius:0}
 .msg-time{font-size:10px;color:var(--c-text3);margin-top:4px}
 #chat-seen-status{text-align:right;font-size:11px;color:var(--c-text3);padding:0 20px 8px;display:none;flex-shrink:0}
 #chat-input-area{padding:14px 16px;background:var(--c-surface);border-top:1px solid var(--c-border);display:flex;gap:10px;align-items:flex-end;flex-shrink:0}
 #admin-reply{flex:1;border:1.5px solid var(--c-border);border-radius:14px;padding:10px 15px;font-size:14px;resize:none;outline:none;max-height:120px;min-height:44px;line-height:1.5;transition:.2s;background:var(--c-bg)}
-#admin-reply:focus{border-color:var(--c-accent);background:#fff}
-#send-reply-btn{width:44px;height:44px;background:var(--c-accent);color:#fff;border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;font-size:16px}
-#send-reply-btn:hover{background:var(--c-accent2);transform:scale(1.05)}
+#admin-reply:focus{border-color:var(--c-text);background:#fff}
+#send-reply-btn{width:42px;height:42px;background:var(--c-text);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;font-size:16px}
+#send-reply-btn:hover{background:var(--c-red)}
 
 /* CONV COUNT BADGE */
 #conv-count{background:rgba(99,102,241,.2);color:var(--c-accent);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.3px}
@@ -238,7 +241,7 @@ input,textarea,select{font-family:var(--font)}
     <div id="chat-main">
       <div id="chat-header">
         <div id="chat-header-avatar"></div>
-        <div>
+        <div class="ch-info">
           <div id="chat-header-name"></div>
           <div id="chat-header-sub"></div>
         </div>
@@ -444,9 +447,11 @@ function openConv(sessionId) {
   const initial = (conv.customerName || '?')[0].toUpperCase();
   document.getElementById('chat-header-avatar').textContent = initial;
   document.getElementById('chat-header-name').textContent = conv.customerName || 'Khách';
-  document.getElementById('chat-header-sub').textContent =
-    (conv.customerPhone ? '📞 ' + conv.customerPhone + ' · ' : '') +
-    '🕐 ' + (conv.startedAt ? formatTime(conv.startedAt) : '');
+  const sub = document.getElementById('chat-header-sub');
+  const phoneTag = conv.customerPhone ? `<span class="ch-tag">📞 ${escHtml(conv.customerPhone)}</span>` : '';
+  const timeTag = conv.startedAt ? `<span class="ch-tag">⏰ Bắt đầu: ${formatFull(conv.startedAt)}</span>` : '';
+  const ipTag = conv.userIP ? `<span class="ch-ip">IP: ${escHtml(conv.userIP)}</span>` : '';
+  sub.innerHTML = phoneTag + timeTag + ipTag;
 
   document.getElementById('chat-placeholder').style.display = 'none';
   document.getElementById('chat-main').style.display = 'flex';
@@ -471,7 +476,7 @@ function appendMsg(msg) {
   div.innerHTML = `
     <div>
       <div class="msg-bubble">${escHtml(msg.text)}</div>
-      <div class="msg-time">${formatTime(msg.timestamp)}</div>
+      <div class="msg-time">${formatFull(msg.timestamp)}</div>
     </div>`;
   document.getElementById('chat-messages').appendChild(div);
   document.getElementById('chat-messages').scrollTop = 99999;
@@ -554,6 +559,13 @@ function filterConvs() {
 }
 
 // --- UTILS ---
+function formatFull(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const date = d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  const time = d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  return date + ' · ' + time;
+}
 function formatTime(ts) {
   if (!ts) return '';
   const d = new Date(ts);
@@ -561,7 +573,7 @@ function formatTime(ts) {
   if (d.toDateString() === now.toDateString()) {
     return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   }
-  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
 }
 
 function escHtml(str) {

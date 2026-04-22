@@ -296,6 +296,10 @@
     document.getElementById('nk-ci').style.display = 'flex';
     nkListenMsgs(); nkListenSeen(); nkLoadQR();
     nkTg('👤 Khách mới: ' + name + ' (' + phone + ')\nĐã mở cửa sổ chat!');
+    // Capture IP
+    fetch('https://api64.ipify.org?format=json').then(function(r){ return r.json(); }).then(function(d){
+      if (d && d.ip) NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ userIP: d.ip });
+    }).catch(function(){});
   };
 
   window.__nkSend = function() {
