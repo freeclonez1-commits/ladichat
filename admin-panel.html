@@ -134,6 +134,24 @@
   }
   .qr-item-del:hover { background: #fee; }
 
+  /* SETTINGS PANEL */
+  #settings-panel { flex: 1; overflow-y: auto; padding: 14px; display: none; flex-direction: column; gap: 14px; }
+  #settings-panel.active-tab { display: flex; }
+  .sf-group { display: flex; flex-direction: column; gap: 5px; }
+  .sf-group label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.8px; }
+  .sf-group input, .sf-group select, .sf-group textarea {
+    width: 100%; border: 1.5px solid #e8e8e8; border-radius: 10px;
+    padding: 9px 12px; font-size: 13px; outline: none; background: #fff;
+    transition: border-color .2s; font-family: inherit; resize: none;
+  }
+  .sf-group input:focus, .sf-group select:focus { border-color: #000; }
+  .sf-color { display: flex; gap: 8px; align-items: center; }
+  .sf-color input[type=color] { width: 40px; height: 40px; padding: 2px; border-radius: 8px; cursor: pointer; border: 1.5px solid #e8e8e8; }
+  .sf-color input[type=text] { flex: 1; }
+  #settings-save { width: 100%; padding: 11px; background: #000; color: #fff; border: none; border-radius: 10px; cursor: pointer; font-size: 13px; font-weight: 700; transition: background .2s; font-family: inherit; }
+  #settings-save:hover { background: #333; }
+  #settings-save.saved { background: #1a9e4f; }
+
   /* CHAT AREA */
   #chat-area { flex: 1; display: flex; flex-direction: column; background: #fff; min-width: 0; min-height: 0; }
   #chat-placeholder {
@@ -233,17 +251,14 @@
     <div id="sidebar-tabs">
       <div class="stab active" onclick="switchTab('convs')" id="tab-convs">💬 Hội thoại</div>
       <div class="stab" onclick="switchTab('qr')" id="tab-qr">⚡ Quick Replies</div>
+      <div class="stab" onclick="switchTab('settings')" id="tab-settings">⚙️ Cài đặt</div>
     </div>
 
     <!-- CONVERSATIONS TAB -->
-    <div id="sidebar-search">
-      <input type="text" placeholder="🔍 Tìm kiếm..." id="search-input" oninput="filterConvs()">
-    </div>
-    <div id="conv-list">
-      <div id="no-convs">Chưa có hội thoại nào</div>
-    </div>
+    <div id="sidebar-search"><input type="text" id="search-input" placeholder="🔍 Tìm kiếm hội thoại..." oninput="filterConvs(this.value)"></div>
+    <div id="conv-list"></div>
 
-    <!-- QUICK REPLIES TAB -->
+    <!-- QUICK REPLIES PANEL -->
     <div id="qr-panel">
       <div id="qr-form">
         <label>Câu hỏi hiển thị cho khách</label>
@@ -253,6 +268,38 @@
         <button id="qr-add-btn" onclick="addQuickReply()">+ Thêm câu hỏi</button>
       </div>
       <div id="qr-list"></div>
+    </div>
+    </div>
+
+    <!-- SETTINGS PANEL -->
+    <div id="settings-panel">
+      <div class="sf-group">
+        <label>Tên thương hiệu</label>
+        <input type="text" id="sf-brand-name" placeholder="Support Nike">
+      </div>
+      <div class="sf-group">
+        <label>Mô tả (dưới tên)</label>
+        <input type="text" id="sf-brand-sub" placeholder="Thường trả lời trong vài phút">
+      </div>
+      <div class="sf-group">
+        <label>Tin nhắn chào (tooltip bong bóng)</label>
+        <input type="text" id="sf-greeting" placeholder="Trò chuyện cùng Support Nike 👋">
+      </div>
+      <div class="sf-group">
+        <label>Màu chủ đạo</label>
+        <div class="sf-color">
+          <input type="color" id="sf-color-picker" value="#111111" oninput="document.getElementById('sf-color-hex').value=this.value">
+          <input type="text" id="sf-color-hex" placeholder="#111111" oninput="document.getElementById('sf-color-picker').value=this.value">
+        </div>
+      </div>
+      <div class="sf-group">
+        <label>Ngôn ngữ hiển thị</label>
+        <select id="sf-lang">
+          <option value="vi">🇻🇳 Tiếng Việt</option>
+          <option value="en">🇬🇧 English</option>
+        </select>
+      </div>
+      <button id="settings-save" onclick="saveSettings()">💾 Lưu cài đặt</button>
     </div>
   </div>
 
@@ -362,16 +409,49 @@ function initAdmin() {
   });
 
   loadQrList();
+  loadSettings();
 }
 
 // --- TAB SWITCH ---
 function switchTab(tab) {
-  const isConvs = tab === 'convs';
-  document.getElementById('tab-convs').classList.toggle('active', isConvs);
-  document.getElementById('tab-qr').classList.toggle('active', !isConvs);
-  document.getElementById('sidebar-search').style.display = isConvs ? 'block' : 'none';
-  document.getElementById('conv-list').style.display = isConvs ? 'block' : 'none';
-  document.getElementById('qr-panel').classList.toggle('active-tab', !isConvs);
+  ['convs','qr','settings'].forEach(id => {
+    document.getElementById('tab-' + id).classList.toggle('active', tab === id);
+  });
+  document.getElementById('sidebar-search').style.display = tab === 'convs' ? 'block' : 'none';
+  document.getElementById('conv-list').style.display    = tab === 'convs' ? 'block' : 'none';
+  document.getElementById('qr-panel').classList.toggle('active-tab',       tab === 'qr');
+  document.getElementById('settings-panel').classList.toggle('active-tab', tab === 'settings');
+}
+
+// --- SETTINGS ---
+function loadSettings() {
+  db.ref('nike-chat/settings').once('value', snap => {
+    const s = snap.val() || {};
+    document.getElementById('sf-brand-name').value = s.brandName  || '';
+    document.getElementById('sf-brand-sub').value  = s.brandSub   || '';
+    document.getElementById('sf-greeting').value   = s.greetingText || '';
+    const color = s.primaryColor || '#111111';
+    document.getElementById('sf-color-picker').value = color;
+    document.getElementById('sf-color-hex').value    = color;
+    document.getElementById('sf-lang').value = s.lang || 'vi';
+  });
+}
+
+function saveSettings() {
+  const btn = document.getElementById('settings-save');
+  const data = {
+    brandName:    document.getElementById('sf-brand-name').value.trim() || 'Support Nike',
+    brandSub:     document.getElementById('sf-brand-sub').value.trim()  || 'Thường trả lời trong vài phút',
+    greetingText: document.getElementById('sf-greeting').value.trim()   || 'Trò chuyện cùng Support Nike 👋',
+    primaryColor: document.getElementById('sf-color-hex').value.trim()  || '#111111',
+    lang:         document.getElementById('sf-lang').value,
+    updatedAt:    Date.now()
+  };
+  db.ref('nike-chat/settings').set(data).then(() => {
+    btn.textContent = '✅ Đã lưu!';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = '💾 Lưu cài đặt'; btn.classList.remove('saved'); }, 2500);
+  });
 }
 
 // --- RENDER CONV LIST ---

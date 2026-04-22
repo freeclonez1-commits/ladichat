@@ -88,9 +88,9 @@
     '.nk-mr.admin .nk-mb{background:#fff;color:#111;border-bottom-left-radius:5px;border:1px solid #ebebeb}',
     '.nk-mr.customer .nk-mb{background:#111;color:#fff;border-bottom-right-radius:5px}',
     '.nk-mt{margin:4px 2px 0;padding:0;font-size:10px;color:#bbb;font-weight:500;display:block;line-height:1}',
-    '#nk-qr{padding:8px 12px 4px;margin:0;display:flex;gap:7px;flex-wrap:wrap;background:#f6f6f6;flex-shrink:0}',
-    '.nk-qb{background:#fff;color:#333;border:1.5px solid #e0e0e0;border-radius:20px;padding:6px 13px;margin:0;font-size:12px;font-weight:500;cursor:pointer;line-height:1.3;transition:all .18s;white-space:nowrap;font-family:inherit}',
-    '.nk-qb:hover{background:#111;color:#fff;border-color:#111}',
+    '#nk-qr{padding:8px 12px 4px;margin:0;display:flex;gap:7px;flex-wrap:wrap;background:#f6f6f6;flex-shrink:0;transition:opacity .2s}',
+    '.nk-qb{background:rgba(255,255,255,.75);color:#666;border:1.5px solid #e8e8e8;border-radius:20px;padding:5px 12px;margin:0;font-size:11.5px;font-weight:500;cursor:pointer;line-height:1.3;transition:all .18s;white-space:nowrap;font-family:inherit;opacity:.85}',
+    '.nk-qb:hover{background:#111;color:#fff;border-color:#111;opacity:1}',
     '#nk-ss{margin:0;padding:3px 16px 6px;text-align:right;font-size:11px;color:#bbb;display:none;flex-shrink:0;line-height:1}',
     '#nk-ia{padding:10px 12px;margin:0;background:#fff;border-top:1px solid #efefef;display:flex;gap:9px;align-items:flex-end;flex-shrink:0}',
     '#nk-inp{flex:1;border:1.5px solid #e8e8e8;border-radius:22px;padding:10px 16px;margin:0;font-size:14px;resize:none;outline:none;display:block;max-height:110px;min-height:40px;line-height:1.5;transition:border-color .2s,box-shadow .2s;background:#f8f8f8;color:#111;font-family:inherit}',
@@ -118,27 +118,27 @@
         '<div id="nk-badge">0</div>',
       '</button>',
       '<div id="nk-box">',
-        '<div id="nk-hd">',
-          '<img src="' + CFG.logoUrl + '" alt="">',
-          '<div id="nk-hi">',
-            '<h3>' + nkE(CFG.brandName) + '</h3>',
-            '<p>' + nkE(CFG.brandSub) + '</p>',
-          '</div>',
-          '<div id="nk-dot"></div>',
+      '<div id="nk-hd">',
+        '<img id="nk-logo" src="' + CFG.logoUrl + '" alt="">',
+        '<div id="nk-hi">',
+          '<h3 id="nk-hd-name">' + nkE(CFG.brandName) + '</h3>',
+          '<p id="nk-hd-sub">' + nkE(CFG.brandSub) + '</p>',
         '</div>',
-        '<div id="nk-ob">',
-          '<h4>Chat với Nike</h4>',
-          '<p>Xin chào! Để chúng tôi hỗ trợ bạn tốt nhất, vui lòng cho biết một vài thông tin nhé.</p>',
-          '<div class="nk-ig"><label>Tên của bạn</label><input type="text" id="nk-name" placeholder="Ví dụ: Nguyễn Văn A"></div>',
-          '<div class="nk-ig"><label>Số điện thoại</label><input type="tel" id="nk-phone" placeholder="Ví dụ: 0912345678"></div>',
-          '<button id="nk-start" onclick="__nkStart()">Bắt đầu cuộc trò chuyện</button>',
-        '</div>',
+        '<div id="nk-dot"></div>',
+      '</div>',
+      '<div id="nk-ob">',
+        '<h4 id="nk-ob-title">Chat với Nike</h4>',
+        '<p id="nk-ob-sub">Xin chào! Để chúng tôi hỗ trợ bạn tốt nhất, vui lòng cho biết một vài thông tin nhé.</p>',
+        '<div class="nk-ig"><label id="nk-name-lbl">Tên của bạn</label><input type="text" id="nk-name" placeholder="Ví dụ: Nguyễn Văn A"></div>',
+        '<div class="nk-ig"><label id="nk-phone-lbl">Số điện thoại</label><input type="tel" id="nk-phone" placeholder="Ví dụ: 0912345678"></div>',
+        '<button id="nk-start" onclick="__nkStart()">Bắt đầu cuộc trò chuyện</button>',
+      '</div>',
         '<div id="nk-ci">',
           '<div id="nk-msgs"></div>',
           '<div id="nk-ss"></div>',
           '<div id="nk-qr"></div>',
           '<div id="nk-ia">',
-            '<textarea id="nk-inp" placeholder="Nhập tin nhắn..." rows="1" oninput="__nkResize(this)" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();__nkSend()}"></textarea>',
+            '<textarea id="nk-inp" placeholder="Nhập tin nhắn..." rows="1" oninput="__nkResize(this)" onfocus="__nkShowQR()" onkeydown="if(event.key===\'Enter\'&&!event.shiftKey){event.preventDefault();__nkSend()}"></textarea>',
             '<button id="nk-send" onclick="__nkSend()"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>',
           '</div>',
         '</div>',
@@ -150,7 +150,27 @@
   wrap.innerHTML = html;
   document.body.appendChild(wrap.firstChild);
 
-  // ===== 3. LOAD FIREBASE ASYNC =====
+  // ===== 4. LOAD FIREBASE ASYNC =====
+  // Language packs
+  var LANG = {
+    vi: {
+      obTitle:'Chat với Nike', obSub:'Xin chào! Vui lòng cho biết thông tin để chúng tôi hỗ trợ bạn tốt hơn.',
+      nameLabel:'Tên của bạn', namePh:'Ví dụ: Nguyễn Văn A',
+      phoneLabel:'Số điện thoại', phonePh:'Ví dụ: 0912345678',
+      startBtn:'Bắt đầu cuộc trò chuyện', inputPh:'Nhập tin nhắn...',
+      seen:'✓ Đã xem', sent:'✓ Đã gửi',
+      welcome: function(n){ return 'Chào '+n+'! Cảm ơn bạn đã quan tâm đến Nike. Bạn cần tư vấn sản phẩm nào ạ?'; }
+    },
+    en: {
+      obTitle:'Chat with Nike', obSub:'Hello! Please share your info so we can assist you.',
+      nameLabel:'Your name', namePh:'e.g. John Smith',
+      phoneLabel:'Phone number', phonePh:'e.g. +84912345678',
+      startBtn:'Start conversation', inputPh:'Type a message...',
+      seen:'✓ Seen', sent:'✓ Sent',
+      welcome: function(n){ return 'Hi '+n+'! Thank you for your interest in Nike. How can we help you?'; }
+    }
+  };
+  NK.lp = LANG.vi; // default
   function loadScript(src, cb) {
     if (document.querySelector('script[src="' + src + '"]')) { cb(); return; }
     var s = document.createElement('script');
@@ -173,16 +193,50 @@
   });
 
   // ===== 4. BOOT =====
-  function nkBoot() {
-    // Greeting
-    var tip = document.getElementById('nk-tip');
-    if (tip && !sessionStorage.getItem('nk_tip_shown')) {
-      setTimeout(function() {
-        tip.classList.add('show');
-        sessionStorage.setItem('nk_tip_shown', '1');
-        setTimeout(function() { tip.classList.remove('show'); }, 5000);
-      }, 1200);
+  function nkApplySettings(s) {
+    if (!s) return;
+    var lp = (s.lang && LANG[s.lang]) ? LANG[s.lang] : LANG.vi;
+    NK.lp = lp;
+    // Tên thương hiệu & sub
+    var el;
+    if (s.brandName) { el = document.getElementById('nk-hd-name'); if (el) el.textContent = s.brandName; }
+    if (s.brandSub)  { el = document.getElementById('nk-hd-sub');  if (el) el.textContent = s.brandSub; }
+    // Màu chủ đạo
+    if (s.primaryColor) {
+      var c = s.primaryColor;
+      var ts = document.getElementById('nk-theme') || document.createElement('style');
+      ts.id = 'nk-theme';
+      ts.textContent = '#nk-btn,#nk-hd,#nk-start,#nk-send,.nk-mr.customer .nk-mb{background:' + c + '!important}'
+        + '#nk-tip{background:' + c + '!important}#nk-tip::after{border-top-color:' + c + '!important}';
+      document.head.appendChild(ts);
     }
+    // Ngôn ngữ
+    el = document.getElementById('nk-ob-title'); if (el) el.textContent = lp.obTitle;
+    el = document.getElementById('nk-ob-sub');   if (el) el.textContent = lp.obSub;
+    el = document.getElementById('nk-name-lbl'); if (el) el.textContent = lp.nameLabel;
+    el = document.getElementById('nk-name');     if (el) el.placeholder = lp.namePh;
+    el = document.getElementById('nk-phone-lbl');if (el) el.textContent = lp.phoneLabel;
+    el = document.getElementById('nk-phone');    if (el) el.placeholder = lp.phonePh;
+    el = document.getElementById('nk-start');    if (el) el.textContent = lp.startBtn;
+    el = document.getElementById('nk-inp');      if (el) el.placeholder = lp.inputPh;
+    // Greeting tooltip
+    if (s.greetingText) { el = document.getElementById('nk-tip'); if (el) el.textContent = s.greetingText; }
+  }
+
+  function nkBoot() {
+    // Load settings trước, rồi mới show greeting
+    NK.db.ref('nike-chat/settings').once('value', function(snap) {
+      nkApplySettings(snap.val());
+      // Greeting
+      var tip = document.getElementById('nk-tip');
+      if (tip && !sessionStorage.getItem('nk_tip_shown')) {
+        setTimeout(function() {
+          tip.classList.add('show');
+          sessionStorage.setItem('nk_tip_shown', '1');
+          setTimeout(function() { tip.classList.remove('show'); }, 5000);
+        }, 1200);
+      }
+    });
     // Restore session
     if (NK.sessionId) {
       document.getElementById('nk-ob').style.display = 'none';
@@ -243,6 +297,9 @@
     inp.value = ''; inp.style.height = 'auto';
     var pendingAnswer = NK.pendingAnswer || null;
     NK.pendingAnswer = null;
+    // Ẩn QR sau khi gửi
+    var qr = document.getElementById('nk-qr');
+    if (qr) qr.style.display = 'none';
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'customer', text: text, timestamp: Date.now() });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: text, lastMessageAt: Date.now(), unread: true });
     nkTg('\uD83D\uDCAC ' + (localStorage.getItem('nk_chat_name') || 'Kh\u00e1ch') + ': ' + text);
@@ -272,6 +329,12 @@
     inp.style.borderColor = '#111';
     inp.style.boxShadow = '0 0 0 3px rgba(0,0,0,0.1)';
     setTimeout(function() { inp.style.borderColor = ''; inp.style.boxShadow = ''; }, 1500);
+  };
+
+  window.__nkShowQR = function() {
+    if (!NK.qrData.length) return;
+    var qr = document.getElementById('nk-qr');
+    if (qr) qr.style.display = 'flex';
   };
 
   window.__nkResize = function(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; };
