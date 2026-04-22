@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nike Mind - Chat Admin</title>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; }
+  body { background: #fafafa; height: 100vh; overflow: hidden; color: #111; }
+
+  /* LOGIN */
+  #login-screen {
+    position: fixed; inset: 0; background: #000;
+    display: flex; align-items: center; justify-content: center; z-index: 999;
+  }
+  #login-screen.hidden { display: none; }
+  .login-box { text-align: center; background: #000; padding: 40px; border-radius: 24px; width: 100%; max-width: 400px; }
+  .login-box img { width: 90px; filter: invert(1); margin-bottom: 32px; }
+  .login-box h2 { color: #fff; font-size: 24px; font-weight: 800; margin-bottom: 12px; letter-spacing: -0.5px; }
+  .login-box p { color: #888; font-size: 14px; margin-bottom: 32px; }
+  .login-box input {
+    width: 100%; background: #111; border: 2px solid #333; border-radius: 12px;
+    padding: 16px 20px; color: #fff; font-size: 15px; outline: none; display: block; margin-bottom: 16px;
+    transition: all .3s;
+  }
+  .login-box input:focus { border-color: #fff; background: #000; }
+  .login-box button {
+    width: 100%; background: #fff; color: #000; border: none; border-radius: 30px;
+    padding: 16px; font-size: 16px; font-weight: 800; cursor: pointer; transition: all .3s;
+  }
+  .login-box button:hover { background: #ddd; transform: translateY(-2px); }
+  .login-error { color: #ff3b30; font-size: 13px; margin-top: 14px; font-weight: 600; }
+
+  /* MAIN LAYOUT */
+  #app { display: flex; height: 100vh; }
+
+  /* SIDEBAR */
+  #sidebar {
+    width: 320px; background: #fff; border-right: 1px solid #eee;
+    display: flex; flex-direction: column; flex-shrink: 0;
+  }
+  #sidebar-header {
+    padding: 20px; background: #000; display: flex; align-items: center; gap: 12px; flex-shrink: 0;
+  }
+  #sidebar-header img { width: 40px; filter: invert(1); }
+  #sidebar-header h1 { color: #fff; font-size: 16px; font-weight: 800; letter-spacing: -0.2px; }
+  #sidebar-header span { color: rgba(255,255,255,0.6); font-size: 11px; display: block; margin-top: 2px; }
+  #online-dot { width: 10px; height: 10px; border-radius: 50%; background: #00ff00; margin-left: auto; flex-shrink: 0; box-shadow: 0 0 10px rgba(0,255,0,0.5); }
+
+  /* SIDEBAR TABS */
+  #sidebar-tabs {
+    display: flex; border-bottom: 1px solid #eee; flex-shrink: 0;
+  }
+  .stab {
+    flex: 1; padding: 12px 8px; text-align: center; font-size: 12px; font-weight: 600;
+    cursor: pointer; color: #999; border-bottom: 2px solid transparent; transition: all .2s;
+  }
+  .stab.active { color: #000; border-bottom-color: #000; }
+
+  #sidebar-search {
+    padding: 12px 16px; border-bottom: 1px solid #f5f5f5; flex-shrink: 0;
+  }
+  #sidebar-search input {
+    width: 100%; border: 2px solid #f0f0f0; border-radius: 12px;
+    padding: 9px 14px; font-size: 13px; outline: none; transition: all .2s;
+    background: #f9f9f9;
+  }
+  #sidebar-search input:focus { border-color: #000; background: #fff; }
+
+  #conv-list { flex: 1; overflow-y: auto; }
+  .conv-item {
+    padding: 16px; border-bottom: 1px solid #f9f9f9; cursor: pointer;
+    display: flex; align-items: center; gap: 12px; transition: all .2s;
+  }
+  .conv-item:hover { background: #f9f9f9; }
+  .conv-item.active { background: #f4f4f4; border-right: 3px solid #000; }
+  .conv-avatar {
+    width: 44px; height: 44px; border-radius: 50%; background: #000;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 16px; flex-shrink: 0;
+  }
+  .conv-info { flex: 1; min-width: 0; }
+  .conv-name { font-size: 14px; font-weight: 700; color: #000; margin-bottom: 3px; }
+  .conv-preview { font-size: 12px; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-meta { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .conv-time { font-size: 10px; color: #999; font-weight: 500; }
+  .conv-unread { width: 9px; height: 9px; border-radius: 50%; background: #000; }
+
+  /* QUICK REPLIES PANEL */
+  #qr-panel { flex: 1; overflow-y: auto; padding: 14px; display: none; flex-direction: column; gap: 12px; }
+  #qr-panel.active-tab { display: flex; }
+  
+  #qr-form {
+    background: #f9f9f9; border-radius: 14px; padding: 14px;
+    display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+    border: 1.5px solid #eee;
+  }
+  #qr-form input, #qr-form textarea {
+    width: 100%; border: 1.5px solid #e8e8e8; border-radius: 10px;
+    padding: 9px 12px; font-size: 13px; outline: none; background: #fff;
+    transition: border-color .2s; resize: none; line-height: 1.4;
+    font-family: inherit;
+  }
+  #qr-form input:focus, #qr-form textarea:focus { border-color: #000; }
+  #qr-form label { font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.8px; }
+  #qr-add-btn {
+    width: 100%; padding: 10px; background: #000; color: #fff; border: none; border-radius: 10px;
+    cursor: pointer; font-size: 13px; font-weight: 700; transition: background .2s;
+    font-family: inherit;
+  }
+  #qr-add-btn:hover { background: #333; }
+
+  #qr-list { display: flex; flex-direction: column; gap: 8px; }
+  .qr-item {
+    background: #fff; border-radius: 12px; padding: 12px 14px;
+    border: 1.5px solid #f0f0f0;
+  }
+  .qr-item-q {
+    font-size: 13px; font-weight: 600; color: #111;
+    margin-bottom: 5px;
+  }
+  .qr-item-q::before { content: '❓ '; font-size: 11px; }
+  .qr-item-a {
+    font-size: 12px; color: #555; line-height: 1.4;
+    margin-bottom: 8px;
+  }
+  .qr-item-a::before { content: '💬 '; font-size: 11px; }
+  .qr-item-del {
+    width: 100%; padding: 5px; border: 1px solid #fcc; border-radius: 8px;
+    background: #fff5f5; color: #c00; cursor: pointer; font-size: 12px;
+    font-family: inherit; transition: background .18s;
+  }
+  .qr-item-del:hover { background: #fee; }
+
+  /* CHAT AREA */
+  #chat-area { flex: 1; display: flex; flex-direction: column; background: #fff; min-width: 0; min-height: 0; }
+  #chat-placeholder {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #bbb;
+  }
+  #chat-placeholder img { width: 80px; opacity: .1; margin-bottom: 24px; }
+  #chat-placeholder p { font-size: 15px; font-weight: 500; letter-spacing: 0.5px; }
+
+  #chat-main { flex: 1; display: none; flex-direction: column; background: #f4f4f4; min-height: 0; }
+  #chat-header {
+    padding: 18px 22px; background: #fff; border-bottom: 1px solid #eee;
+    display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+  }
+  #chat-header-avatar {
+    width: 42px; height: 42px; border-radius: 50%; background: #000;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 800; font-size: 15px; flex-shrink: 0;
+  }
+  #chat-header-name { font-size: 16px; font-weight: 700; color: #000; }
+  #chat-header-sub { font-size: 12px; color: #666; margin-top: 2px; }
+
+  #chat-messages {
+    flex: 1; overflow-y: auto; padding: 24px 22px 10px; display: flex; flex-direction: column; gap: 16px; min-height: 0;
+  }
+  .msg-row { display: flex; width: 100%; }
+  .msg-row.customer { justify-content: flex-start; }
+  .msg-row.admin { justify-content: flex-end; }
+  .msg-row > div { max-width: 70%; display: flex; flex-direction: column; }
+  .msg-row.customer > div { align-items: flex-start; }
+  .msg-row.admin > div { align-items: flex-end; }
+
+  .msg-bubble {
+    padding: 10px 16px; border-radius: 50px;
+    font-size: 14px; line-height: 1.5; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    width: fit-content; min-width: 40px;
+  }
+  .msg-row.customer .msg-bubble { background: #fff; color: #000; border-bottom-left-radius: 4px; border: 1px solid #eee; }
+  .msg-row.admin .msg-bubble { background: #000; color: #fff; border-bottom-right-radius: 4px; }
+  .msg-time { font-size: 10px; color: #999; margin-top: 5px; font-weight: 500; }
+
+  #chat-seen-status { text-align: right; font-size: 11px; color: #888; padding: 0 22px 8px; display: none; flex-shrink: 0; }
+
+  #chat-input-area {
+    padding: 16px 20px; background: #fff; border-top: 1px solid #eee;
+    display: flex; gap: 12px; align-items: flex-end; flex-shrink: 0;
+  }
+  #admin-reply {
+    flex: 1; border: 2px solid #f0f0f0; border-radius: 16px;
+    padding: 11px 16px; font-size: 14px; resize: none; outline: none;
+    max-height: 150px; min-height: 46px; line-height: 1.5;
+    transition: all .2s; background: #f9f9f9;
+  }
+  #admin-reply:focus { border-color: #000; background: #fff; }
+  #send-reply-btn {
+    width: 46px; height: 46px; background: #000; color: #fff;
+    border: none; border-radius: 50%; cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all .3s;
+  }
+  #send-reply-btn:hover { background: #333; transform: scale(1.1); }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+  ::-webkit-scrollbar-thumb:hover { background: #ccc; }
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-box">
+    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike">
+    <h2>Nike Mind Chat Admin</h2>
+    <p>Đăng nhập để quản lý hội thoại</p>
+    <input type="password" id="pwd-input" placeholder="Mật khẩu" onkeydown="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Đăng nhập</button>
+    <div class="login-error" id="login-error"></div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="sidebar">
+    <div id="sidebar-header">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike">
+      <div>
+        <h1>Support Nike</h1>
+        <span id="conv-count">0 hội thoại</span>
+      </div>
+      <div id="online-dot"></div>
+    </div>
+
+    <!-- TABS -->
+    <div id="sidebar-tabs">
+      <div class="stab active" onclick="switchTab('convs')" id="tab-convs">💬 Hội thoại</div>
+      <div class="stab" onclick="switchTab('qr')" id="tab-qr">⚡ Quick Replies</div>
+    </div>
+
+    <!-- CONVERSATIONS TAB -->
+    <div id="sidebar-search">
+      <input type="text" placeholder="🔍 Tìm kiếm..." id="search-input" oninput="filterConvs()">
+    </div>
+    <div id="conv-list">
+      <div id="no-convs">Chưa có hội thoại nào</div>
+    </div>
+
+    <!-- QUICK REPLIES TAB -->
+    <div id="qr-panel">
+      <div id="qr-form">
+        <label>Câu hỏi hiển thị cho khách</label>
+        <input type="text" id="qr-new-q" placeholder="Ví dụ: Giao hàng trong bao lâu?">
+        <label>Câu trả lời tự động</label>
+        <textarea id="qr-new-a" placeholder="Ví dụ: Dạ trong vòng 3-5 ngày ạ..." rows="3"></textarea>
+        <button id="qr-add-btn" onclick="addQuickReply()">+ Thêm câu hỏi</button>
+      </div>
+      <div id="qr-list"></div>
+    </div>
+  </div>
+
+  <div id="chat-area">
+    <div id="chat-placeholder">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike">
+      <p>Chọn một hội thoại để bắt đầu</p>
+    </div>
+    <div id="chat-main">
+      <div id="chat-header">
+        <div id="chat-header-avatar"></div>
+        <div>
+          <div id="chat-header-name"></div>
+          <div id="chat-header-sub"></div>
+        </div>
+      </div>
+      <div id="chat-messages"></div>
+      <div id="chat-seen-status"></div>
+      <div id="chat-input-area">
+        <textarea id="admin-reply" placeholder="Nhập tin nhắn reply..." rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendReply()}"
+          oninput="autoResize(this)"></textarea>
+        <button id="send-reply-btn" onclick="sendReply()">➤</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// =============================================
+// ⚙️ CẤU HÌNH
+const ADMIN_PASSWORD = 'nike2024';
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyBixlTG4JuR3bx8OZ_27VRZ3YqDxVvSylM",
+  authDomain: "gen-lang-client-0957346569.firebaseapp.com",
+  databaseURL: "https://gen-lang-client-0957346569-default-rtdb.firebaseio.com",
+  projectId: "gen-lang-client-0957346569",
+  storageBucket: "gen-lang-client-0957346569.firebasestorage.app",
+  messagingSenderId: "318435093664",
+  appId: "1:318435093664:web:f8f3f68da5c4da352fadc5"
+};
+const DB_PATH = 'nike-chat/conversations';
+// =============================================
+
+firebase.initializeApp(FIREBASE_CONFIG);
+const db = firebase.database();
+
+let allConvs = {};
+let activeSessionId = null;
+
+// Âm thanh thông báo cho Admin (dùng AudioContext để không bị trình duyệt chặn)
+let adminAudioCtx = null;
+function playAdminSound() {
+  try {
+    if (!adminAudioCtx) adminAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = adminAudioCtx.createOscillator();
+    const g = adminAudioCtx.createGain();
+    o.connect(g); g.connect(adminAudioCtx.destination);
+    o.type = 'sine'; o.frequency.setValueAtTime(880, adminAudioCtx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(440, adminAudioCtx.currentTime + 0.15);
+    g.gain.setValueAtTime(0.3, adminAudioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, adminAudioCtx.currentTime + 0.4);
+    o.start(); o.stop(adminAudioCtx.currentTime + 0.4);
+  } catch(e) {}
+}
+
+// --- LOGIN ---
+function doLogin() {
+  const pwd = document.getElementById('pwd-input').value;
+  if (pwd === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').classList.add('hidden');
+    initAdmin();
+  } else {
+    document.getElementById('login-error').textContent = 'Sai mật khẩu!';
+  }
+}
+
+// --- INIT ---
+function initAdmin() {
+  db.ref(DB_PATH).on('value', (snapshot) => {
+    const newConvs = snapshot.val() || {};
+
+    // Phát âm thanh khi có tin nhắn mới từ khách (unread = true)
+    Object.entries(newConvs).forEach(([sid, conv]) => {
+      const old = allConvs[sid];
+      if (conv.unread && (!old || !old.unread || conv.lastMessageAt !== old.lastMessageAt)) {
+        playAdminSound();
+      }
+    });
+
+    allConvs = newConvs;
+    renderConvList(allConvs);
+  });
+
+  loadQrList();
+}
+
+// --- TAB SWITCH ---
+function switchTab(tab) {
+  const isConvs = tab === 'convs';
+  document.getElementById('tab-convs').classList.toggle('active', isConvs);
+  document.getElementById('tab-qr').classList.toggle('active', !isConvs);
+  document.getElementById('sidebar-search').style.display = isConvs ? 'block' : 'none';
+  document.getElementById('conv-list').style.display = isConvs ? 'block' : 'none';
+  document.getElementById('qr-panel').classList.toggle('active-tab', !isConvs);
+}
+
+// --- RENDER CONV LIST ---
+function renderConvList(convs) {
+  const list = document.getElementById('conv-list');
+  const entries = Object.entries(convs).sort((a, b) => (b[1].lastMessageAt || 0) - (a[1].lastMessageAt || 0));
+
+  document.getElementById('conv-count').textContent = entries.length + ' hội thoại';
+
+  if (entries.length === 0) {
+    list.innerHTML = '<div id="no-convs" style="padding:24px;text-align:center;color:#bbb;font-size:13px;">Chưa có hội thoại nào</div>';
+    return;
+  }
+
+  list.innerHTML = entries.map(([sid, conv]) => {
+    const initial = (conv.customerName || '?')[0].toUpperCase();
+    const time = conv.lastMessageAt ? formatTime(conv.lastMessageAt) : '';
+    const preview = conv.lastMessage || 'Bắt đầu hội thoại...';
+    const unread = conv.unread ? '<div class="conv-unread"></div>' : '';
+    return `
+      <div class="conv-item ${sid === activeSessionId ? 'active' : ''}" onclick="openConv('${sid}')">
+        <div class="conv-avatar">${initial}</div>
+        <div class="conv-info">
+          <div class="conv-name">${escHtml(conv.customerName || 'Khách')}</div>
+          <div class="conv-preview">${escHtml(preview)}</div>
+        </div>
+        <div class="conv-meta">
+          <div class="conv-time">${time}</div>
+          ${unread}
+        </div>
+      </div>`;
+  }).join('');
+
+  // Update seen status for active session
+  if (activeSessionId && allConvs[activeSessionId]) {
+    const activeConv = allConvs[activeSessionId];
+    const isCustomerRead = activeConv.unreadCustomer === false;
+    const lastMsgByAdmin = activeConv.lastMessage && activeConv.lastMessage.startsWith('[Admin]');
+    const seenStatus = document.getElementById('chat-seen-status');
+    if (seenStatus) {
+      if (lastMsgByAdmin) {
+        seenStatus.style.display = 'block';
+        seenStatus.textContent = isCustomerRead ? '✓ Đã xem' : '✓ Đã gửi';
+      } else {
+        seenStatus.style.display = 'none';
+      }
+    }
+  }
+}
+
+// --- OPEN CONVERSATION ---
+function openConv(sessionId) {
+  const conv = allConvs[sessionId];
+  if (!conv) return;
+
+  if (activeSessionId) {
+    db.ref(`${DB_PATH}/${activeSessionId}/messages`).off();
+  }
+
+  activeSessionId = sessionId;
+  db.ref(`${DB_PATH}/${sessionId}/unread`).set(false);
+
+  const initial = (conv.customerName || '?')[0].toUpperCase();
+  document.getElementById('chat-header-avatar').textContent = initial;
+  document.getElementById('chat-header-name').textContent = conv.customerName || 'Khách';
+  document.getElementById('chat-header-sub').textContent =
+    (conv.customerPhone ? '📞 ' + conv.customerPhone + ' · ' : '') +
+    '🕐 ' + (conv.startedAt ? formatTime(conv.startedAt) : '');
+
+  document.getElementById('chat-placeholder').style.display = 'none';
+  document.getElementById('chat-main').style.display = 'flex';
+  document.getElementById('chat-main').style.flexDirection = 'column';
+  document.getElementById('chat-messages').innerHTML = '';
+
+  db.ref(`${DB_PATH}/${sessionId}/messages`).on('child_added', (snap) => {
+    const msg = snap.val();
+    appendMsg(msg);
+    if (msg.sender === 'customer') {
+      db.ref(`${DB_PATH}/${sessionId}/unread`).set(false);
+    }
+  });
+
+  renderConvList(allConvs);
+}
+
+// --- APPEND MESSAGE ---
+function appendMsg(msg) {
+  const div = document.createElement('div');
+  div.className = 'msg-row ' + (msg.sender === 'admin' ? 'admin' : 'customer');
+  div.innerHTML = `
+    <div>
+      <div class="msg-bubble">${escHtml(msg.text)}</div>
+      <div class="msg-time">${formatTime(msg.timestamp)}</div>
+    </div>`;
+  document.getElementById('chat-messages').appendChild(div);
+  document.getElementById('chat-messages').scrollTop = 99999;
+}
+
+// --- SEND REPLY ---
+function sendReply() {
+  if (!activeSessionId) return;
+  const text = document.getElementById('admin-reply').value.trim();
+  if (!text) return;
+
+  db.ref(`${DB_PATH}/${activeSessionId}/messages`).push({
+    text: text,
+    sender: 'admin',
+    timestamp: Date.now()
+  });
+
+  db.ref(`${DB_PATH}/${activeSessionId}`).update({
+    lastMessage: '[Admin] ' + text,
+    lastMessageAt: Date.now(),
+    unread: false,
+    unreadCustomer: true
+  });
+
+  document.getElementById('admin-reply').value = '';
+  document.getElementById('admin-reply').style.height = 'auto';
+}
+
+// =============================================
+// ⚡ QUICK REPLIES MANAGEMENT
+// =============================================
+function loadQrList() {
+  db.ref('nike-chat/quickReplies').on('value', (snap) => {
+    const data = snap.val() || {};
+    const container = document.getElementById('qr-list');
+    const entries = Object.entries(data).filter(([k,v]) => v && v.question);
+
+    if (!entries.length) {
+      container.innerHTML = '<div style="font-size:13px;color:#bbb;text-align:center;padding:12px 0;">Chưa có câu hỏi nào. Thêm bên trên nhé!</div>';
+      return;
+    }
+
+    container.innerHTML = entries.map(([key, item]) => `
+      <div class="qr-item">
+        <div class="qr-item-q">${escHtml(item.question)}</div>
+        <div class="qr-item-a">${escHtml(item.answer || '(chưa có câu trả lời)')}</div>
+        <button class="qr-item-del" onclick="deleteQuickReply('${key}')">🗑 Xóa</button>
+      </div>`).join('');
+  });
+}
+
+function addQuickReply() {
+  const qInput = document.getElementById('qr-new-q');
+  const aInput = document.getElementById('qr-new-a');
+  const question = qInput.value.trim();
+  const answer = aInput.value.trim();
+  if (!question || !answer) {
+    alert('Vui lòng nhập cả Câu hỏi và Câu trả lời!');
+    return;
+  }
+  db.ref('nike-chat/quickReplies').push({ question, answer });
+  qInput.value = '';
+  aInput.value = '';
+}
+
+function deleteQuickReply(key) {
+  db.ref('nike-chat/quickReplies/' + key).remove();
+}
+
+// --- FILTER ---
+function filterConvs() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  const filtered = {};
+  Object.entries(allConvs).forEach(([sid, conv]) => {
+    if ((conv.customerName || '').toLowerCase().includes(q)) {
+      filtered[sid] = conv;
+    }
+  });
+  renderConvList(filtered);
+}
+
+// --- UTILS ---
+function formatTime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const now = new Date();
+  if (d.toDateString() === now.toDateString()) {
+    return d.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+  }
+  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' });
+}
+
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+</script>
+</body>
+</html>
