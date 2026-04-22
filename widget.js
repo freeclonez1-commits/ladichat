@@ -239,23 +239,32 @@
     var inp = document.getElementById('nk-inp');
     var text = inp.value.trim(); if (!text) return;
     inp.value = ''; inp.style.height = 'auto';
+    var pendingAnswer = NK.pendingAnswer || null;
+    NK.pendingAnswer = null;
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'customer', text: text, timestamp: Date.now() });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: text, lastMessageAt: Date.now(), unread: true });
-    nkTg('💬 ' + (localStorage.getItem('nk_chat_name') || 'Khách') + ': ' + text);
-  };
-
-  window.__nkQR = function(q, a) {
-    if (!NK.db || !NK.sessionId) return;
-    NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'customer', text: q, timestamp: Date.now() });
-    NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: q, lastMessageAt: Date.now(), unread: true });
-    nkTg('💬 ' + (localStorage.getItem('nk_chat_name') || 'Khách') + ': ' + q);
-    if (a) {
+    nkTg('\uD83D\uDCAC ' + (localStorage.getItem('nk_chat_name') || 'Kh\u00e1ch') + ': ' + text);
+    // N\u1ebfu c\u00f3 c\u00e2u tr\u1ea3 l\u1eddi t\u1ef1 \u0111\u1ed9ng (t\u1eeb Quick Reply)
+    if (pendingAnswer) {
       setTimeout(function() {
         if (!NK.db || !NK.sessionId) return;
-        NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'admin', text: a, timestamp: Date.now() });
-        NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: '[Admin] ' + a, lastMessageAt: Date.now(), unread: false, unreadCustomer: false });
-      }, 700);
+        NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'admin', text: pendingAnswer, timestamp: Date.now() });
+        NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: '[Admin] ' + pendingAnswer, lastMessageAt: Date.now(), unread: false, unreadCustomer: false });
+      }, 800);
     }
+  };
+
+  // Quick Reply: fill v\u00e0o input, l\u01b0u c\u00e2u tr\u1ea3 l\u1eddi ch\u1edd g\u1eedi
+  window.__nkQR = function(q, a) {
+    var inp = document.getElementById('nk-inp');
+    if (!inp) return;
+    inp.value = q;
+    inp.focus();
+    NK.pendingAnswer = a || null; // l\u01b0u c\u00e2u tr\u1ea3 l\u1eddi \u0111\u1ec3 g\u1eedi sau khi user b\u1ea5m Send
+    window.__nkResize(inp);
+    // Highlight input nh\u1eb9 \u0111\u1ec3 user bi\u1ebft \u0111\u00e3 fill
+    inp.style.borderColor = '#111';
+    setTimeout(function() { inp.style.borderColor = ''; }, 1200);
   };
 
   window.__nkResize = function(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; };

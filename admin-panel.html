@@ -226,6 +226,7 @@
         <span id="conv-count">0 hội thoại</span>
       </div>
       <div id="online-dot"></div>
+      <button onclick="doLogout()" title="Đăng xuất" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:16px;padding:4px;margin-left:4px;line-height:1;">⏻</button>
     </div>
 
     <!-- TABS -->
@@ -322,12 +323,26 @@ function playAdminSound() {
 function doLogin() {
   const pwd = document.getElementById('pwd-input').value;
   if (pwd === ADMIN_PASSWORD) {
+    localStorage.setItem('nk_admin_auth', '1');
     document.getElementById('login-screen').classList.add('hidden');
     initAdmin();
   } else {
     document.getElementById('login-error').textContent = 'Sai mật khẩu!';
   }
 }
+
+function doLogout() {
+  localStorage.removeItem('nk_admin_auth');
+  location.reload();
+}
+
+// Tự động login nếu đã xác thực trước
+(function autoLogin() {
+  if (localStorage.getItem('nk_admin_auth') === '1') {
+    document.getElementById('login-screen').classList.add('hidden');
+    initAdmin();
+  }
+})();
 
 // --- INIT ---
 function initAdmin() {
