@@ -224,8 +224,8 @@
       messagingSenderId: "318435093664",
       appId: "1:318435093664:web:f8f3f68da5c4da352fadc5"
     },
-    tgToken: '7890410484:AAHxMwViGPM-nmuG_U2sHjwF_7Ajs2VA0T0',
-    tgChatId: '6843744862',
+    // 🔒 Token Telegram đã được chuyển sang Cloudflare Worker — KHÔNG hardcode ở đây!
+    notifyUrl: 'https://nk-notify.freeclonez1.workers.dev',
     db: null,
     sessionId: localStorage.getItem('nk_chat_session_id'),
     isOpen: false,
@@ -419,12 +419,14 @@ function listenForSeenStatus() {
 
 function sendTelegramNotif(text) {
   var NK = window._NK;
-  var token = NK ? NK.tgToken : ''; var chatId = NK ? NK.tgChatId : '';
-  if (!token) return;
-  fetch('https://api.telegram.org/bot' + token + '/sendMessage', {
-    method: 'POST', headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ chat_id: chatId, text: 'Nike Chat\n---\n' + text })
-  }).catch(function(e){ console.log(e); });
+  var url = NK ? NK.notifyUrl : '';
+  // Gửi qua Cloudflare Worker Proxy — token Telegram chỉ lưu trên server, không lộ ra frontend
+  if (!url || url.includes('YOUR_NAME')) return;
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: text })
+  }).catch(function(e) { console.warn('[NikeChat] Notify error:', e); });
 }
 
 function nkEsc(str) { return String(str||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>'); }

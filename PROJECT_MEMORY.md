@@ -52,5 +52,9 @@
   - Thêm `margin: 0; padding: 0;` trong selector scope để ngăn LadiPage ghi đè.
   - Firebase `initializeApp` được bảo vệ bằng `if (!firebase.apps.length)` để tránh lỗi nếu Firebase đã được khởi tạo ở nơi khác trên trang.
 
+### Ngày 22/04/2026 (Security Audit & Fixes)
+- **Xóa lộ lọt Token Telegram:** Chuyển API request gọi sang Telegram Bot từ `widget.js` & `widget.html` sang một proxy an toàn viết bằng Cloudflare Worker (`cloudflare-worker.js`). Điều này giúp token bot ẩn hoàn toàn trên server thay vì lưu ở client-side.
+- **Bảo mật Đăng nhập Admin Panel:** Chuyển đổi cơ chế đăng nhập từ một mật khẩu cứng (hardcoded password `nike2024`) trên frontend sang sử dụng **Firebase Authentication (Email/Password)**. Giao diện `admin-panel.html` đã được thêm trường nhập Email để tương thích và toàn bộ quản lý xác thực được xử lý qua Firebase Auth API, đảm bảo an toàn tối đa.
+
 ---
 *Ghi chú: File này sẽ được cập nhật liên tục trong quá trình phát triển để AI và người dùng luôn đồng bộ bối cảnh dự án.*
