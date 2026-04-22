@@ -232,18 +232,28 @@
   }
 
   function nkBoot() {
-    // Load settings trước, rồi mới show greeting
+     // Load settings trước, rồi mới show greeting
     NK.db.ref('nike-chat/settings').once('value', function(snap) {
       nkApplySettings(snap.val());
-      // Greeting
+      // Greeting tooltip — hiện ngẫu nhiên lặp lại khi chat đang đóng
       var tip = document.getElementById('nk-tip');
-      if (tip && !sessionStorage.getItem('nk_tip_shown')) {
-        setTimeout(function() {
+      function showTipOnce() {
+        if (!NK.isOpen && tip) {
           tip.classList.add('show');
-          sessionStorage.setItem('nk_tip_shown', '1');
-          setTimeout(function() { tip.classList.remove('show'); }, 5000);
-        }, 1200);
+          setTimeout(function() { tip.classList.remove('show'); }, 4000);
+        }
       }
+      // Lần đầu: hiện sau 1.5s
+      setTimeout(showTipOnce, 1500);
+      // Lặp lại: mỗi 25-40 giây ngẫu nhiên
+      function scheduleNext() {
+        var delay = 25000 + Math.random() * 15000; // 25s - 40s
+        NK._tipTimer = setTimeout(function() {
+          showTipOnce();
+          scheduleNext();
+        }, delay);
+      }
+      scheduleNext();
     });
     // Restore session
     if (NK.sessionId) {
