@@ -156,6 +156,17 @@
   #nk-chat-box ::-webkit-scrollbar { width: 3px; }
   #nk-chat-box ::-webkit-scrollbar-track { background: transparent; }
   #nk-chat-box ::-webkit-scrollbar-thumb { background: #ddd; border-radius: 10px; }
+
+  /* ── AI Bot styles ── */
+  .nk-ai-lbl { font-size: 10px; color: #10b981; font-weight: 700; margin: 0 0 3px 2px; display: flex; align-items: center; gap: 3px; line-height: 1; }
+  .nk-sys-div { display: flex; align-items: center; gap: 8px; padding: 6px 14px; flex-shrink: 0; }
+  .nk-sys-line { flex: 1; height: 1px; background: #e0e0e0; }
+  .nk-sys-txt { font-size: 11px; color: #aaa; white-space: nowrap; font-style: italic; }
+  .nk-typing { display: flex; align-items: center; gap: 4px; padding: 10px 14px; background: #fff; border-radius: 18px; border-bottom-left-radius: 5px; border: 1px solid #ebebeb; box-shadow: 0 1px 4px rgba(0,0,0,.07); width: fit-content; }
+  .nk-typing span { width: 6px; height: 6px; border-radius: 50%; background: #ccc; display: inline-block; animation: nkdot 1.2s infinite; }
+  .nk-typing span:nth-child(2) { animation-delay: .2s; }
+  .nk-typing span:nth-child(3) { animation-delay: .4s; }
+  @keyframes nkdot { 0%,80%,100%{transform:scale(.6);opacity:.5} 40%{transform:scale(1);opacity:1} }
 </style>
 
 <!-- HTML WIDGET -->
@@ -229,7 +240,9 @@
     db: null,
     sessionId: localStorage.getItem('nk_chat_session_id'),
     isOpen: false,
-    unread: 0
+    unread: 0,
+    aiMode: false,
+    msgHistory: []
   };
 
   // ---------- DYNAMIC SCRIPT LOADER ----------
@@ -275,6 +288,7 @@
       listenForMessages();
       listenForSeenStatus();
       loadQuickReplies();
+      listenForAIMode();
     }
   };
 })();
@@ -316,17 +330,18 @@ function nkStartChat() {
   NK.db.ref('nike-chat/conversations/' + NK.sessionId).set({
     customerName: name, customerPhone: phone,
     startedAt: Date.now(), lastMessageAt: Date.now(),
-    lastMessage: 'Khách hàng bắt đầu hội thoại', unread: true
+    lastMessage: 'Khách hàng bắt đầu hội thoại', unread: true,
+    aiMode: true
   });
   NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({
     sender: 'admin',
     text: 'Chào ' + name + '! Cảm ơn bạn đã quan tâm đến Nike. Bạn cần tư vấn sản phẩm nào ạ?',
-    timestamp: Date.now()
+    timestamp: Date.now(), isAI: true
   });
 
   document.getElementById('nk-onboard').style.display = 'none';
   document.getElementById('nk-chat-interface').style.display = 'flex';
-  listenForMessages(); listenForSeenStatus(); loadQuickReplies();
+  listenForMessages(); listenForSeenStatus(); loadQuickReplies(); listenForAIMode();
   sendTelegramNotif('👤 Khách mới: ' + name + ' (' + phone + ')\nĐã mở cửa sổ chat!');
 }
 
@@ -340,6 +355,9 @@ function nkSendMessage() {
   NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: text, lastMessageAt: Date.now(), unread: true });
   var name = localStorage.getItem('nk_chat_name') || 'Khách';
   sendTelegramNotif('💬 ' + name + ': ' + text);
+
+  // Nếu đang ở AI mode → gọi AI trả lời
+  if (NK.aiMode) nkAIReply(text);
 }
 
 function nkSendQuickReply(question, answer) {
@@ -376,6 +394,68 @@ function loadQuickReplies() {
   });
 }
 
+function listenForAIMode() {
+  var NK = window._NK; if (!NK || !NK.db || !NK.sessionId) return;
+  NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/aiMode').on('value', function(snap) {
+    var newMode = !!snap.val();
+    if (NK.aiMode === true && newMode === false) nkShowHandoffDivider();
+    NK.aiMode = newMode;
+  });
+}
+
+function nkShowTyping() {
+  var msgsDiv = document.getElementById('nk-messages');
+  if (document.getElementById('nk-typing-row')) return;
+  var row = document.createElement('div');
+  row.id = 'nk-typing-row'; row.className = 'nk-msg-row admin';
+  row.innerHTML = '<div><div class="nk-ai-lbl">🤖 Nike Bot</div><div class="nk-typing"><span></span><span></span><span></span></div></div>';
+  msgsDiv.appendChild(row); msgsDiv.scrollTop = msgsDiv.scrollHeight;
+}
+
+function nkHideTyping() {
+  var el = document.getElementById('nk-typing-row');
+  if (el) el.parentNode.removeChild(el);
+}
+
+function nkShowHandoffDivider() {
+  var msgsDiv = document.getElementById('nk-messages');
+  var div = document.createElement('div'); div.className = 'nk-sys-div';
+  div.innerHTML = '<div class="nk-sys-line"></div><div class="nk-sys-txt">Bạn không còn chat với tác nhân AI nữa</div><div class="nk-sys-line"></div>';
+  msgsDiv.appendChild(div); msgsDiv.scrollTop = msgsDiv.scrollHeight;
+}
+
+function nkAIReply(userText) {
+  var NK = window._NK;
+  var url = NK ? NK.notifyUrl : '';
+  if (!url || url.includes('YOUR_NAME')) return;
+  var aiUrl = url.replace(/\/$/, '') + '/ai';
+  nkShowTyping();
+  fetch(aiUrl, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message: userText, history: NK.msgHistory.slice(-8) })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(res) {
+    nkHideTyping();
+    var NK = window._NK; if (!NK || !NK.db || !NK.sessionId) return;
+    var reply = res.reply || 'Xin lỗi, tôi chưa hiểu câu hỏi này.';
+    NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({
+      sender: 'admin', text: reply, timestamp: Date.now(), isAI: true
+    });
+    NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({
+      lastMessage: '[AI] ' + reply, lastMessageAt: Date.now(), unreadCustomer: true
+    });
+    if (res.handoff) {
+      NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ aiMode: false });
+    }
+  })
+  .catch(function(e) {
+    console.warn('[NikeChat] AI reply error:', e);
+    nkHideTyping();
+  });
+}
+
 function listenForMessages() {
   var NK = window._NK; if (!NK || !NK.db || !NK.sessionId) return;
   var msgsDiv = document.getElementById('nk-messages');
@@ -383,9 +463,18 @@ function listenForMessages() {
 
   NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').on('child_added', function(snap) {
     var msg = snap.val();
+    // Track history for AI context
+    if (msg.sender === 'customer' || msg.sender === 'admin') NK.msgHistory.push(msg);
+    // System divider
+    if (msg.sender === 'system') {
+      var div = document.createElement('div'); div.className = 'nk-sys-div';
+      div.innerHTML = '<div class="nk-sys-line"></div><div class="nk-sys-txt">' + nkEsc(msg.text) + '</div><div class="nk-sys-line"></div>';
+      msgsDiv.appendChild(div); msgsDiv.scrollTop = msgsDiv.scrollHeight; return;
+    }
     var row = document.createElement('div');
     row.className = 'nk-msg-row ' + msg.sender;
-    row.innerHTML = '<div><div class="nk-msg-bubble">' + nkEsc(msg.text) + '</div><div class="nk-msg-time">' + nkFormatTime(msg.timestamp) + '</div></div>';
+    var aiBadge = (msg.isAI && msg.sender === 'admin') ? '<div class="nk-ai-lbl">🤖 Nike Bot</div>' : '';
+    row.innerHTML = '<div>' + aiBadge + '<div class="nk-msg-bubble">' + nkEsc(msg.text) + '</div><div class="nk-msg-time">' + nkFormatTime(msg.timestamp) + '</div></div>';
     msgsDiv.appendChild(row);
     msgsDiv.scrollTop = msgsDiv.scrollHeight;
 

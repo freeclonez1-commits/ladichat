@@ -40,7 +40,9 @@
     isOpen: false,
     unread: 0,
     pendingAnswer: null,
-    qrData: []  // lưu dữ liệu quick replies để tránh lỗi JSON quote trong onclick
+    qrData: [],   // lưu quick replies
+    aiMode: false, // AI Bot đang bật/tắt
+    msgHistory: [] // lịch sử tin nhắn cho Gemini context
   };
 
   // ===== 1. INJECT CSS =====
@@ -101,7 +103,17 @@
     '#nk-send svg{width:16px;height:16px;fill:currentColor;display:block}',
     '#nk-box ::-webkit-scrollbar{width:3px}',
     '#nk-box ::-webkit-scrollbar-track{background:transparent}',
-    '#nk-box ::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}'
+    '#nk-box ::-webkit-scrollbar-thumb{background:#ddd;border-radius:10px}',
+    /* AI mode styles */
+    '.nk-ai-lbl{font-size:10px;color:#10b981;font-weight:700;margin:0 0 3px 2px;display:flex;align-items:center;gap:3px;line-height:1}',
+    '.nk-sys{display:flex;align-items:center;gap:8px;padding:6px 14px;flex-shrink:0}',
+    '.nk-sys-line{flex:1;height:1px;background:#e0e0e0}',
+    '.nk-sys-txt{font-size:11px;color:#aaa;white-space:nowrap;font-style:italic}',
+    '.nk-typing-wrap{display:flex;align-items:flex-end;gap:6px}',
+    '.nk-typing{display:flex;align-items:center;gap:4px;padding:10px 14px;background:#fff;border-radius:18px;border-bottom-left-radius:5px;border:1px solid #ebebeb;box-shadow:0 1px 4px rgba(0,0,0,.07)}',
+    '.nk-typing span{width:6px;height:6px;border-radius:50%;background:#ccc;display:inline-block;animation:nkdot 1.2s infinite}',
+    '.nk-typing span:nth-child(2){animation-delay:.2s}.nk-typing span:nth-child(3){animation-delay:.4s}',
+    '@keyframes nkdot{0%,80%,100%{transform:scale(.6);opacity:.5}40%{transform:scale(1);opacity:1}}'
   ].join('');
 
   var styleEl = document.createElement('style');
@@ -259,7 +271,7 @@
     if (NK.sessionId) {
       document.getElementById('nk-ob').style.display = 'none';
       document.getElementById('nk-ci').style.display = 'flex';
-      nkListenMsgs(); nkListenSeen(); nkLoadQR();
+      nkListenMsgs(); nkListenSeen(); nkLoadQR(); nkListenAIMode();
     }
   }
 
@@ -297,14 +309,15 @@
     NK.db.ref('nike-chat/conversations/' + NK.sessionId).set({
       customerName: name, customerPhone: phone,
       startedAt: Date.now(), lastMessageAt: Date.now(),
-      lastMessage: 'Khách hàng bắt đầu hội thoại', unread: true
+      lastMessage: 'Khách hàng bắt đầu hội thoại', unread: true,
+      aiMode: true  // bật AI Bot mặc định
     });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({
-      sender: 'admin', text: CFG.welcomeMsg(name), timestamp: Date.now()
+      sender: 'admin', text: CFG.welcomeMsg(name), timestamp: Date.now(), isAI: true
     });
     document.getElementById('nk-ob').style.display = 'none';
     document.getElementById('nk-ci').style.display = 'flex';
-    nkListenMsgs(); nkListenSeen(); nkLoadQR();
+    nkListenMsgs(); nkListenSeen(); nkLoadQR(); nkListenAIMode();
     nkTg('👤 Khách mới: ' + name + ' (' + phone + ')\nĐã mở cửa sổ chat!');
     // Capture IP
     fetch('https://api64.ipify.org?format=json').then(function(r){ return r.json(); }).then(function(d){
@@ -319,14 +332,15 @@
     inp.value = ''; inp.style.height = 'auto';
     var pendingAnswer = NK.pendingAnswer || null;
     NK.pendingAnswer = null;
-    // Ẩn QR sau khi gửi
     var qr = document.getElementById('nk-qr');
     if (qr) qr.style.display = 'none';
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'customer', text: text, timestamp: Date.now() });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: text, lastMessageAt: Date.now(), unread: true });
     nkTg('\uD83D\uDCAC ' + (localStorage.getItem('nk_chat_name') || 'Kh\u00e1ch') + ': ' + text);
-    // N\u1ebfu c\u00f3 c\u00e2u tr\u1ea3 l\u1eddi t\u1ef1 \u0111\u1ed9ng (t\u1eeb Quick Reply)
-    if (pendingAnswer) {
+    // AI Mode: gọi Gemini thay vì pendingAnswer
+    if (NK.aiMode) {
+      nkAIReply(text);
+    } else if (pendingAnswer) {
       setTimeout(function() {
         if (!NK.db || !NK.sessionId) return;
         NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'admin', text: pendingAnswer, timestamp: Date.now() });
@@ -367,14 +381,76 @@
   window.__nkResize = function(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 100) + 'px'; };
 
   // ===== 6. CORE FUNCTIONS =====
+  function nkShowTyping() {
+    var msgs = document.getElementById('nk-msgs');
+    if (document.getElementById('nk-typing-row')) return;
+    var row = document.createElement('div');
+    row.id = 'nk-typing-row'; row.className = 'nk-mr admin';
+    row.innerHTML = '<div><div class="nk-ai-lbl">🤖 Nike Bot</div><div class="nk-typing"><span></span><span></span><span></span></div></div>';
+    msgs.appendChild(row); msgs.scrollTop = msgs.scrollHeight;
+  }
+  function nkHideTyping() {
+    var el = document.getElementById('nk-typing-row');
+    if (el) el.parentNode.removeChild(el);
+  }
+  function nkShowHandoffDivider() {
+    var msgs = document.getElementById('nk-msgs');
+    var div = document.createElement('div');
+    div.className = 'nk-sys';
+    div.innerHTML = '<div class="nk-sys-line"></div><div class="nk-sys-txt">Bạn không còn chat với tác nhân AI nữa</div><div class="nk-sys-line"></div>';
+    msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight;
+  }
+  function nkListenAIMode() {
+    NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/aiMode').on('value', function(snap) {
+      var newMode = !!snap.val();
+      if (NK.aiMode === true && newMode === false) nkShowHandoffDivider();
+      NK.aiMode = newMode;
+    });
+  }
+  function nkAIReply(userText) {
+    if (!CFG.notifyUrl || CFG.notifyUrl.includes('YOUR_NAME')) return;
+    var aiUrl = CFG.notifyUrl.replace(/\/$/, '') + '/ai';
+    nkShowTyping();
+    fetch(aiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: userText, history: NK.msgHistory.slice(-8) })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(res) {
+      nkHideTyping();
+      if (!NK.db || !NK.sessionId) return;
+      var reply = res.reply || 'Xin lỗi, tôi chưa hiểu câu hỏi này.';
+      var handoff = !!res.handoff;
+      NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({
+        sender: 'admin', text: reply, timestamp: Date.now(), isAI: true
+      });
+      NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({
+        lastMessage: '[AI] ' + reply, lastMessageAt: Date.now(), unreadCustomer: true
+      });
+      if (handoff) {
+        NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ aiMode: false });
+      }
+    })
+    .catch(function() { nkHideTyping(); });
+  }
   function nkListenMsgs() {
     var msgs = document.getElementById('nk-msgs');
     var first = true;
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').on('child_added', function(snap) {
       var msg = snap.val();
+      // Track history for AI context
+      if (msg.sender === 'customer' || msg.sender === 'admin') NK.msgHistory.push(msg);
+      if (msg.sender === 'system') {
+        // System divider message
+        var div = document.createElement('div'); div.className = 'nk-sys';
+        div.innerHTML = '<div class="nk-sys-line"></div><div class="nk-sys-txt">' + nkE(msg.text) + '</div><div class="nk-sys-line"></div>';
+        msgs.appendChild(div); msgs.scrollTop = msgs.scrollHeight; return;
+      }
       var row = document.createElement('div');
       row.className = 'nk-mr ' + msg.sender;
-      row.innerHTML = '<div><div class="nk-mb">' + nkE(msg.text) + '</div><div class="nk-mt">' + nkTime(msg.timestamp) + '</div></div>';
+      var aiBadge = (msg.isAI && msg.sender === 'admin') ? '<div class="nk-ai-lbl">🤖 Nike Bot</div>' : '';
+      row.innerHTML = '<div>' + aiBadge + '<div class="nk-mb">' + nkE(msg.text) + '</div><div class="nk-mt">' + nkTime(msg.timestamp) + '</div></div>';
       msgs.appendChild(row);
       msgs.scrollTop = msgs.scrollHeight;
       if (!first && msg.sender === 'admin') {
