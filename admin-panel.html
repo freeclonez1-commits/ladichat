@@ -147,6 +147,19 @@ input,textarea,select{font-family:var(--font)}
 /* CONV COUNT BADGE */
 #conv-count{background:rgba(99,102,241,.2);color:var(--c-accent);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.3px}
 
+/* AI TOGGLE */
+.ai-toggle-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
+.ai-toggle-label{font-size:11px;font-weight:700;letter-spacing:.3px;color:#fff;opacity:.75}
+.ai-toggle-btn{position:relative;width:42px;height:23px;border-radius:99px;border:none;cursor:pointer;transition:background .25s;flex-shrink:0;padding:0}
+.ai-toggle-btn.on{background:#22c55e}
+.ai-toggle-btn.off{background:#555}
+.ai-toggle-btn::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.ai-toggle-btn.on::after{transform:translateX(19px)}
+.ai-status-txt{font-size:10px;font-weight:800;letter-spacing:.5px}
+.ai-status-txt.on{color:#22c55e}
+.ai-status-txt.off{color:#888}
+.msg-ai-badge{font-size:9px;color:#10b981;font-weight:700;display:flex;align-items:center;gap:3px;margin-bottom:3px;letter-spacing:.3px}
+
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--c-border);border-radius:4px}
@@ -248,6 +261,12 @@ input,textarea,select{font-family:var(--font)}
         <div class="ch-info">
           <div id="chat-header-name"></div>
           <div id="chat-header-sub"></div>
+        </div>
+        <!-- AI TOGGLE -->
+        <div class="ai-toggle-wrap" id="ai-toggle-wrap" style="display:none">
+          <span class="ai-toggle-label">🤖 AI Bot</span>
+          <button class="ai-toggle-btn off" id="ai-toggle-btn" onclick="toggleAIMode()" title="Bật/Tắt AI Bot"></button>
+          <span class="ai-status-txt off" id="ai-status-txt">TẮT</span>
         </div>
       </div>
       <div id="chat-messages"></div>
@@ -457,6 +476,54 @@ function renderConvList(convs) {
   }
 }
 
+// AI MODE TOGGLE
+let aiModeListener = null;
+
+function listenAIMode(sessionId) {
+  // Hủy listener cũ
+  if (aiModeListener) {
+    db.ref(aiModeListener).off();
+    aiModeListener = null;
+  }
+  const path = `${DB_PATH}/${sessionId}/aiMode`;
+  aiModeListener = path;
+  db.ref(path).on('value', (snap) => {
+    const isOn = !!snap.val();
+    const btn = document.getElementById('ai-toggle-btn');
+    const txt = document.getElementById('ai-status-txt');
+    const wrap = document.getElementById('ai-toggle-wrap');
+    if (!btn) return;
+    wrap.style.display = 'flex';
+    btn.className = 'ai-toggle-btn ' + (isOn ? 'on' : 'off');
+    txt.className  = 'ai-status-txt ' + (isOn ? 'on' : 'off');
+    txt.textContent = isOn ? 'BẬT' : 'TẮT';
+  });
+}
+
+function toggleAIMode() {
+  if (!activeSessionId) return;
+  const path = `${DB_PATH}/${activeSessionId}/aiMode`;
+  db.ref(path).once('value', (snap) => {
+    const current = !!snap.val();
+    db.ref(path).set(!current).then(() => {
+      // Nếu tắt AI → thêm message hệ thống vào chat
+      if (current) {
+        db.ref(`${DB_PATH}/${activeSessionId}/messages`).push({
+          sender: 'system',
+          text: '— Admin đã tắt AI Bot. Chế độ chat 1-1 đang hoạt động —',
+          timestamp: Date.now()
+        });
+      } else {
+        db.ref(`${DB_PATH}/${activeSessionId}/messages`).push({
+          sender: 'system',
+          text: '— AI Bot đã được bật. Bot sẽ tự động phản hồi —',
+          timestamp: Date.now()
+        });
+      }
+    });
+  });
+}
+
 // --- OPEN CONVERSATION ---
 function openConv(sessionId) {
   const conv = allConvs[sessionId];
@@ -483,6 +550,9 @@ function openConv(sessionId) {
   document.getElementById('chat-main').style.flexDirection = 'column';
   document.getElementById('chat-messages').innerHTML = '';
 
+  // Start listening AI mode for this session
+  listenAIMode(sessionId);
+
   db.ref(`${DB_PATH}/${sessionId}/messages`).on('child_added', (snap) => {
     const msg = snap.val();
     appendMsg(msg);
@@ -497,9 +567,19 @@ function openConv(sessionId) {
 // --- APPEND MESSAGE ---
 function appendMsg(msg) {
   const div = document.createElement('div');
+  // System message (AI divider)
+  if (msg.sender === 'system') {
+    div.style.cssText = 'display:flex;align-items:center;gap:8px;padding:4px 0;margin:4px 0';
+    div.innerHTML = `<div style="flex:1;height:1px;background:#e0e0e0"></div><div style="font-size:10px;color:#aaa;white-space:nowrap;font-style:italic">${escHtml(msg.text)}</div><div style="flex:1;height:1px;background:#e0e0e0"></div>`;
+    document.getElementById('chat-messages').appendChild(div);
+    document.getElementById('chat-messages').scrollTop = 99999;
+    return;
+  }
   div.className = 'msg-row ' + (msg.sender === 'admin' ? 'admin' : 'customer');
+  const aiBadge = (msg.isAI && msg.sender === 'admin') ? '<div class="msg-ai-badge">🤖 Nike Bot</div>' : '';
   div.innerHTML = `
     <div>
+      ${aiBadge}
       <div class="msg-bubble">${escHtml(msg.text)}</div>
       <div class="msg-time">${formatFull(msg.timestamp)}</div>
     </div>`;
