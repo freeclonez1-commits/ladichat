@@ -23,10 +23,17 @@
     // Sau khi deploy worker, thay URL này bằng URL worker của bạn:
     notifyUrl: 'https://nk-notify.freeclonez1.workers.dev',
     brandName: 'Support Nike',
-    brandSub: 'Thường trả lời trong vài phút',
+    brandSub: 'โดยปกติจะตอบกลับภายในไม่กี่นาที',
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
-    greetingText: 'Trò chuyện cùng Support Nike 👋',
-    welcomeMsg: function(name) { return 'Chào ' + name + '! Cảm ơn bạn đã quan tâm đến Nike. Bạn cần tư vấn sản phẩm nào ạ?'; }
+    greetingText: 'สวัสดี! รองเท้า Nike Mind สนใจมั้ย? 👋',
+    welcomeMsg: function(name) {
+      return 'สวัสดีคุณ ' + name + '! 😊
+
+ฉันชื่อ Nike Bot เป็นผู้ช่วย AI ของร้าน Nike Mind
+ช่วยตอบคำถามเกี่ยวกับสินค้า ราคา และการสั่งซื้อได้เลยค่ะ
+
+ถ้าต้องการคุยกับพนักงานจริง แค่พิมพ์ว่า “ขอคุยกัปพนักงาน” ได้เลยนะคะ 🙏';
+    }
   };
   // ===================================================
 
