@@ -42,9 +42,10 @@
     isOpen: false,
     unread: 0,
     pendingAnswer: null,
-    qrData: [],   // lưu quick replies
-    aiMode: false, // AI Bot đang bật/tắt
-    msgHistory: [] // lịch sử tin nhắn cho Gemini context
+    qrData: [],        // lưu quick replies
+    aiMode: false,     // AI Bot đang bật/tắt (per-session)
+    globalAIMode: true, // AI Bot bật/tắt toàn cục (từ Admin)
+    msgHistory: []     // lịch sử tin nhắn cho Gemini context
   };
 
   // ===== 1. INJECT CSS =====
@@ -192,7 +193,7 @@
       welcome: function(n){ return 'สวัสดี '+n+'! ขอบคุณที่ติดต่อเรา เราจะช่วยเหลือคุณทันที!'; }
     }
   };
-  NK.lp = LANG.vi; // default
+  NK.lp = LANG.th; // default: Thai
   function loadScript(src, cb) {
     if (document.querySelector('script[src="' + src + '"]')) { cb(); return; }
     var s = document.createElement('script');
@@ -275,6 +276,8 @@
       document.getElementById('nk-ci').style.display = 'flex';
       nkListenMsgs(); nkListenSeen(); nkLoadQR(); nkListenAIMode();
     }
+    // Luôn lắng nghe Global AI Mode
+    nkListenGlobalAIMode();
   }
 
   // ===== 5. GLOBAL HANDLERS (inline onclick cần window scope) =====
@@ -319,7 +322,7 @@
     });
     document.getElementById('nk-ob').style.display = 'none';
     document.getElementById('nk-ci').style.display = 'flex';
-    nkListenMsgs(); nkListenSeen(); nkLoadQR(); nkListenAIMode();
+    nkListenMsgs(); nkListenSeen(); nkLoadQR(); nkListenAIMode(); nkListenGlobalAIMode();
     nkTg('👤 Khách mới: ' + name + ' (' + phone + ')\nĐã mở cửa sổ chat!');
     // Capture IP
     fetch('https://api64.ipify.org?format=json').then(function(r){ return r.json(); }).then(function(d){
@@ -339,8 +342,8 @@
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({ sender: 'customer', text: text, timestamp: Date.now() });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId).update({ lastMessage: text, lastMessageAt: Date.now(), unread: true });
     nkTg('\uD83D\uDCAC ' + (localStorage.getItem('nk_chat_name') || 'Kh\u00e1ch') + ': ' + text);
-    // AI Mode: gọi Gemini thay vì pendingAnswer
-    if (NK.aiMode) {
+    // AI Mode: chỉ gọi AI khi cả session aiMode lẫn globalAIMode đều bật
+    if (NK.aiMode && NK.globalAIMode) {
       nkAIReply(text);
     } else if (pendingAnswer) {
       setTimeout(function() {
@@ -409,6 +412,15 @@
       NK.aiMode = newMode;
     });
   }
+  function nkListenGlobalAIMode() {
+    if (!NK.db) return;
+    NK.db.ref('nike-chat/globalAIMode').on('value', function(snap) {
+      var wasOn = NK.globalAIMode;
+      NK.globalAIMode = snap.val() !== false; // mặc định true nếu chưa set
+      // Nếu bị tắt toàn cục trong lúc đang chat → hiển thị divider
+      if (wasOn && !NK.globalAIMode && NK.aiMode) nkShowHandoffDivider();
+    });
+  }
   function nkAIReply(userText) {
     if (!CFG.notifyUrl || CFG.notifyUrl.includes('YOUR_NAME')) return;
     var aiUrl = CFG.notifyUrl.replace(/\/$/, '') + '/ai';
@@ -460,7 +472,18 @@
           NK.unread++;
           var b = document.getElementById('nk-badge');
           b.textContent = NK.unread; b.style.display = 'flex';
-          try { new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play(); } catch(e){}
+          // Dùng AudioContext thay vì Audio CDN để kiểm soát âm lượng
+          try {
+            var ac = new (window.AudioContext || window.webkitAudioContext)();
+            var o = ac.createOscillator(); var g = ac.createGain();
+            o.connect(g); g.connect(ac.destination);
+            o.type = 'sine';
+            o.frequency.setValueAtTime(1200, ac.currentTime);
+            o.frequency.exponentialRampToValueAtTime(800, ac.currentTime + 0.12);
+            g.gain.setValueAtTime(0.04, ac.currentTime); // rất nhỏ
+            g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.25);
+            o.start(); o.stop(ac.currentTime + 0.25);
+          } catch(e){}
         } else {
           NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/unreadCustomer').set(false);
         }

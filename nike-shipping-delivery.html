@@ -1,0 +1,131 @@
+<div id="nike-faq-widget">
+  <style>
+    #nike-faq-widget {
+      box-sizing: border-box;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #111;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 20px;
+    }
+    #nike-faq-widget *, #nike-faq-widget *::before, #nike-faq-widget *::after {
+      box-sizing: border-box;
+    }
+    .nike-faq-item {
+      padding: 24px 0;
+      border-bottom: 1px solid transparent; 
+    }
+    .nike-faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      line-height: 1.4;
+    }
+    .nike-faq-icon {
+      flex-shrink: 0;
+      margin-left: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nike-faq-icon svg {
+      width: 24px;
+      height: 24px;
+      transition: transform 0.3s ease;
+      fill: none;
+      stroke: #111;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      /* Mặc định mũi tên hướng lên (đang mở) */
+      transform: rotate(180deg);
+    }
+    .nike-faq-answer {
+      /* Mặc định luôn show thông tin ra */
+      display: block;
+    }
+    .nike-faq-answer-inner {
+      padding-top: 16px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.6;
+    }
+    .nike-faq-answer-inner p {
+      margin: 0 0 16px 0;
+    }
+    .nike-faq-answer-inner p:last-child {
+      margin-bottom: 0;
+    }
+    
+    /* Trạng thái khi đóng lại (click vào sẽ ẩn) */
+    .nike-faq-item.is-closed .nike-faq-answer {
+      display: none;
+    }
+    .nike-faq-item.is-closed .nike-faq-icon svg {
+      transform: rotate(0deg); 
+    }
+  </style>
+
+  <!-- FAQ Item 1 -->
+  <div class="nike-faq-item">
+    <div class="nike-faq-question">
+      ฉันยังไม่ได้รับพัสดุเลย ฉันต้องทำอย่างไร?
+      <span class="nike-faq-icon">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </div>
+    <div class="nike-faq-answer">
+      <div class="nike-faq-answer-inner">
+        <p>โปรดทราบว่าวัน/เวลาในการจัดส่งโดยประมาณเป็นเพียงการคาดการณ์และอาจได้รับผลกระทบจากปัจจัยต่างๆ เช่น ข้อจำกัดด้านการขนส่ง การอนุมัติการชำระเงิน การตรวจสอบความปลอดภัยออนไลน์ และสถานะคลังสินค้า</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Item 2 -->
+  <div class="nike-faq-item">
+    <div class="nike-faq-question">
+      สินค้าที่ฉันสั่งซื้อจะถูกจัดส่งตรงตามวันที่คาดการณ์ไว้หรือไม่?
+      <span class="nike-faq-icon">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </div>
+    <div class="nike-faq-answer">
+      <div class="nike-faq-answer-inner">
+        <p>โปรดทราบว่าวัน/เวลาในการจัดส่งโดยประมาณเป็นเพียงการคาดการณ์และอาจได้รับผลกระทบจากปัจจัยต่างๆ เช่น ข้อจำกัดด้านการขนส่ง การอนุมัติการชำระเงิน การตรวจสอบความปลอดภัยออนไลน์ และสถานะคลังสินค้า</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ Item 3 -->
+  <div class="nike-faq-item">
+    <div class="nike-faq-question">
+      มีพื้นที่ใดบ้างที่ไม่สามารถจัดส่งสินค้าได้?
+      <span class="nike-faq-icon">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </span>
+    </div>
+    <div class="nike-faq-answer">
+      <div class="nike-faq-answer-inner">
+        <p>เรามีบริการจัดส่งถึงโรงแรม โดยคุณจะต้องระบุหมายเลขห้องพักและข้อมูลการติดต่อ การจัดส่งจะทำได้ที่แผนกต้อนรับของโรงแรมเท่านั้น และคุณต้องแจ้งให้แผนกต้อนรับทราบเกี่ยวกับการจัดส่งล่วงหน้า เมื่อสินค้าถูกส่งถึงแผนกต้อนรับแล้ว จะถือว่าการจัดส่งเสร็จสมบูรณ์ Nike จะไม่รับผิดชอบต่อสินค้าที่สูญหายหลังจากการจัดส่ง</p>
+        <p>เราไม่จัดส่งสินค้าไปยังตู้ไปรษณีย์ (P.O. Box) พื้นที่ทางทหาร หรือเขตอนุรักษ์ จะมีค่าธรรมเนียมเพิ่มเติมในกรณีที่ไม่สามารถจัดส่งสินค้าได้ในพื้นที่เหล่านี้</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const questions = document.querySelectorAll('#nike-faq-widget .nike-faq-question');
+    
+    questions.forEach(question => {
+      question.addEventListener('click', () => {
+        const item = question.parentElement;
+        item.classList.toggle('is-closed');
+      });
+    });
+  </script>
+</div>

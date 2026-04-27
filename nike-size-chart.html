@@ -1,0 +1,191 @@
+<div id="nike-size-chart-widget">
+  <style>
+    #nike-size-chart-widget {
+      box-sizing: border-box;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      width: 100%;
+      margin: 0 auto;
+      color: #111;
+      background: #fff;
+    }
+    #nike-size-chart-widget *, #nike-size-chart-widget *::before, #nike-size-chart-widget *::after {
+      box-sizing: border-box;
+    }
+    #nike-size-chart-widget .nike-sc-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding: 0 4px;
+    }
+    #nike-size-chart-widget .nike-sc-title {
+      font-size: 20px;
+      font-weight: 500;
+    }
+    #nike-size-chart-widget .nike-sc-toggle {
+      display: flex;
+      background-color: #f5f5f5;
+      border-radius: 20px;
+      padding: 2px;
+    }
+    #nike-size-chart-widget .nike-sc-toggle-btn {
+      padding: 6px 16px;
+      border-radius: 18px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.2s ease;
+      color: #707070;
+    }
+    #nike-size-chart-widget .nike-sc-toggle-btn.active {
+      background-color: #fff;
+      color: #111;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    #nike-size-chart-widget .nike-sc-table-wrapper {
+      overflow-x: auto;
+      border: 1px solid #e5e5e5;
+      border-radius: 8px;
+      -webkit-overflow-scrolling: touch;
+      position: relative;
+    }
+    /* Customize scrollbar */
+    #nike-size-chart-widget .nike-sc-table-wrapper::-webkit-scrollbar {
+      height: 6px;
+    }
+    #nike-size-chart-widget .nike-sc-table-wrapper::-webkit-scrollbar-track {
+      background: #f1f1f1; 
+      border-radius: 0 0 8px 8px;
+    }
+    #nike-size-chart-widget .nike-sc-table-wrapper::-webkit-scrollbar-thumb {
+      background: #ccc; 
+      border-radius: 4px;
+    }
+    #nike-size-chart-widget .nike-sc-table-wrapper::-webkit-scrollbar-thumb:hover {
+      background: #999; 
+    }
+
+    #nike-size-chart-widget .nike-sc-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    #nike-size-chart-widget .nike-sc-table tr:last-child td {
+      border-bottom: none;
+    }
+    #nike-size-chart-widget .nike-sc-table td {
+      padding: 16px 24px;
+      border-bottom: 1px solid #e5e5e5;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+    /* Alternating column colors */
+    #nike-size-chart-widget .nike-sc-table td:nth-child(even) {
+      background-color: #f7f7f7;
+    }
+    #nike-size-chart-widget .nike-sc-table td:nth-child(odd) {
+      background-color: #ffffff;
+    }
+    
+    /* First Column Styling (Sticky) */
+    #nike-size-chart-widget .nike-sc-table td:first-child {
+      position: sticky;
+      left: 0;
+      background-color: #ffffff !important;
+      z-index: 2;
+      font-weight: 500;
+      box-shadow: inset -1px 0 0 #e5e5e5;
+      padding-left: 20px;
+    }
+    
+    /* Add a subtle shadow when scrolling */
+    #nike-size-chart-widget .is-scrolling td:first-child {
+       box-shadow: 4px 0 8px rgba(0,0,0,0.05), inset -1px 0 0 #e5e5e5;
+    }
+  </style>
+
+  <div class="nike-sc-header">
+    <div class="nike-sc-title">ตารางไซส์</div>
+    <div class="nike-sc-toggle">
+      <div class="nike-sc-toggle-btn active" id="nike-btn-in" onclick="toggleNikeSize('in')">in</div>
+      <div class="nike-sc-toggle-btn" id="nike-btn-cm" onclick="toggleNikeSize('cm')">cm</div>
+    </div>
+  </div>
+  
+  <div class="nike-sc-table-wrapper" id="nike-sc-scroll">
+    <table class="nike-sc-table">
+      <tbody>
+        <!-- Populated by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    const nikeSizeData = {
+      us_men: ["3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "12.5", "13"],
+      us_women: ["5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "12.5", "13", "13.5", "14", "14.5"],
+      uk: ["3", "3.5", "4", "4.5", "5", "5.5", "6", "6.5", "7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "12.5"],
+      cm_jp: ["22.5", "23", "23.5", "23.5", "24", "24", "24.5", "25", "25.5", "26", "26.5", "27", "27.5", "28", "28.5", "29", "29.5", "30", "30.5", "31"],
+      eu: ["35.5", "36", "36.5", "37.5", "38", "38.5", "39", "40", "40.5", "41", "42", "42.5", "43", "44", "44.5", "45", "45.5", "46", "47", "47.5"],
+      foot_in: ["8 1/2", "8 11/16", "8 13/16", "9", "9 3/16", "9 5/16", "9 1/2", "9 11/16", "9 13/16", "10", "10 3/16", "10 5/16", "10 1/2", "10 11/16", "10 13/16", "11", "11 3/16", "11 5/16", "11 1/2", "11 11/16"],
+      foot_cm: ["21.6", "22", "22.4", "22.9", "23.3", "23.7", "24.1", "24.5", "25", "25.4", "25.8", "26.2", "26.7", "27.1", "27.5", "27.9", "28.4", "28.8", "29.2", "29.6"]
+    };
+
+    const tbody = document.querySelector('#nike-size-chart-widget .nike-sc-table tbody');
+    
+    const rows = [
+      { label: "US - ชาย", data: nikeSizeData.us_men },
+      { label: "US - หญิง", data: nikeSizeData.us_women },
+      { label: "UK", data: nikeSizeData.uk },
+      { label: "CM / JP", data: nikeSizeData.cm_jp },
+      { label: "EU", data: nikeSizeData.eu },
+    ];
+
+    let html = '';
+    
+    // Build first 5 rows
+    rows.forEach(row => {
+      html += `<tr><td>${row.label}</td>`;
+      row.data.forEach(val => {
+        html += `<td>${val}</td>`;
+      });
+      html += `</tr>`;
+    });
+
+    // Build Foot Length row
+    html += `<tr><td id="nike-sc-fl-label">ความยาวเท้า (in)</td>`;
+    nikeSizeData.foot_in.forEach((valIn, idx) => {
+      const valCm = nikeSizeData.foot_cm[idx];
+      html += `<td class="nike-sc-fl-val" data-in="${valIn}" data-cm="${valCm}">${valIn}</td>`;
+    });
+    html += `</tr>`;
+
+    tbody.innerHTML = html;
+
+    // Toggle function
+    window.toggleNikeSize = function(unit) {
+      document.getElementById('nike-btn-in').classList.remove('active');
+      document.getElementById('nike-btn-cm').classList.remove('active');
+      document.getElementById('nike-btn-' + unit).classList.add('active');
+
+      const label = document.getElementById('nike-sc-fl-label');
+      label.innerText = `ความยาวเท้า (${unit})`;
+
+      const vals = document.querySelectorAll('.nike-sc-fl-val');
+      vals.forEach(td => {
+        td.innerText = td.getAttribute('data-' + unit);
+      });
+    };
+    
+    // Scroll shadow effect
+    const scrollWrapper = document.getElementById('nike-sc-scroll');
+    scrollWrapper.addEventListener('scroll', function() {
+      if (this.scrollLeft > 0) {
+        this.classList.add('is-scrolling');
+      } else {
+        this.classList.remove('is-scrolling');
+      }
+    });
+  </script>
+</div>

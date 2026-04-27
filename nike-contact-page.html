@@ -1,0 +1,130 @@
+<div id="nike-contact-widget">
+  <style>
+    #nike-contact-widget {
+      box-sizing: border-box;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #111;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 60px 20px;
+    }
+    #nike-contact-widget *, #nike-contact-widget *::before, #nike-contact-widget *::after {
+      box-sizing: border-box;
+    }
+    .nike-contact-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .nike-contact-header h1 {
+      font-size: 32px;
+      font-weight: 500;
+      margin: 0;
+      letter-spacing: -0.5px;
+      text-transform: uppercase;
+    }
+    .nike-contact-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+    .nike-contact-card {
+      text-align: center;
+      padding: 40px 20px;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .nike-contact-card:hover {
+      background: #f5f5f5;
+    }
+    .nike-contact-icon {
+      margin-bottom: 24px;
+    }
+    .nike-contact-icon svg {
+      width: 40px;
+      height: 40px;
+      fill: #111;
+    }
+    .nike-contact-card h3 {
+      font-size: 20px;
+      font-weight: 500;
+      margin: 0 0 12px 0;
+    }
+    .nike-contact-details {
+      font-size: 14px;
+      color: #757575;
+      line-height: 1.6;
+    }
+    .nike-contact-details strong {
+      color: #111;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .nike-contact-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .nike-contact-card {
+        padding: 30px 20px;
+        border-bottom: 1px solid #e5e5e5;
+      }
+      .nike-contact-card:last-child {
+        border-bottom: none;
+      }
+      .nike-contact-header h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+
+  <div class="nike-contact-header">
+    <h1>ติดต่อเรา</h1>
+  </div>
+
+  <div class="nike-contact-grid">
+    <!-- Chat Card -->
+    <a href="#" class="nike-contact-card">
+      <div class="nike-contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+      </div>
+      <h3>แชทกับเรา</h3>
+      <div class="nike-contact-details">
+        <strong>สินค้าและคำสั่งซื้อ</strong>
+        เปิดให้บริการทุกวัน<br>09:00 - 21:00 น.
+      </div>
+    </a>
+
+    <!-- Call Card -->
+    <a href="tel:021234567" class="nike-contact-card">
+      <div class="nike-contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l2.19-2.19a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+      </div>
+      <h3>โทรหาเรา</h3>
+      <div class="nike-contact-details">
+        <strong>02-123-4567</strong>
+        เปิดให้บริการทุกวัน<br>09:00 - 18:00 น.
+      </div>
+    </a>
+
+    <!-- Store Card -->
+    <a href="#" class="nike-contact-card">
+      <div class="nike-contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+      </div>
+      <h3>ค้นหาร้านค้า</h3>
+      <div class="nike-contact-details">
+        <strong>ร้าน Nike ใกล้คุณ</strong>
+        ค้นหาตำแหน่งที่ตั้งและเวลา<br>เปิดให้บริการของสาขาต่างๆ
+      </div>
+    </a>
+  </div>
+</div>

@@ -56,5 +56,44 @@
 - **Xóa lộ lọt Token Telegram:** Chuyển API request gọi sang Telegram Bot từ `widget.js` & `widget.html` sang một proxy an toàn viết bằng Cloudflare Worker (`cloudflare-worker.js`). Điều này giúp token bot ẩn hoàn toàn trên server thay vì lưu ở client-side.
 - **Bảo mật Đăng nhập Admin Panel:** Chuyển đổi cơ chế đăng nhập từ một mật khẩu cứng (hardcoded password `nike2024`) trên frontend sang sử dụng **Firebase Authentication (Email/Password)**. Giao diện `admin-panel.html` đã được thêm trường nhập Email để tương thích và toàn bộ quản lý xác thực được xử lý qua Firebase Auth API, đảm bảo an toàn tối đa.
 
+### C. AI Auto-Reply (Beeknoee AI Proxy)
+- **Cơ chế:** Khi `aiMode` trong Firebase của hội thoại là `true`, tin nhắn khách hàng sẽ được gửi qua Cloudflare Worker tới Beeknoee API.
+- **Model:** Sử dụng `openai/gpt-oss-120b` (hoặc các model khác qua Beeknoee proxy).
+- **Tính năng thông minh:**
+  - **Natural Thai Conversationalist:** Bot được tối ưu để trả lời bằng tiếng Thái tự nhiên (hoặc Việt/Anh theo khách), có chủ ngữ vị ngữ, xuống dòng rõ ràng thay vì câu trả lời ngắn ngủn.
+  - **Product Awareness:** Bot nắm rõ thông tin sản phẩm Nike Mind 001 (giá 1,500 ฿, 6 màu), Nike Mind 002 (hết hàng), chính sách giao hàng và đổi trả.
+  - **Typing Indicator:** Hiệu ứng dấu "..." nhấp nháy khi AI đang soạn thảo.
+  - **AI Badge:** Tin nhắn từ bot có nhãn `🤖 Nike Bot` để phân biệt.
+  - **Handoff Logic:** AI tự nhận diện khi khách muốn gặp người thật và trả về `handoff: true` để chuyển sang nhân viên.
+  - **Handoff Divider:** Dòng kẻ ngăn cách thông báo khi khách thoát chế độ AI.
+
+## 5. Quy trình Vận hành & Deploy
+1. **Cloudflare Worker:**
+   - Cần set các secret: `TG_TOKEN`, `TG_CHAT_ID`, `BEE_API_KEY`.
+   - Command: `npx wrangler secret put <KEY>`
+   - Deploy: `npx wrangler deploy`
+2. **Frontend (Widget):**
+   - File `widget.js` được host trên GitHub Pages (hoặc CDN).
+   - Khi chỉnh sửa code widget, cần push lên GitHub để cập nhật cho Landing Page.
+   - Command: `git add . && git commit -m "..." && git push`
+3. **Firebase:**
+   - Quản lý hội thoại tại `nike-chat/conversations`.
+   - Quản lý Quick Replies tại `nike-chat/quickReplies`.
+
+## 6. Nhật ký phát triển (Changelog) - Tiếp theo
+
+### Ngày 24/04/2026 (AI & Admin Upgrade)
+- **Natural Thai-first AI:** Nâng cấp System Prompt toàn diện. Bot trả lời bằng tiếng Thái tự nhiên, thân thiện ("warm & conversational"), biết xuống dòng và dùng emoji hợp lý.
+- **Product Knowledge Injection:** AI đã "học" toàn bộ thông tin sản phẩm từ `http://www.nike-mind.online/test`, bao gồm giá ưu đãi 1,500 ฿, giá gốc 3,200 ฿, và tình trạng kho hàng của Nike Mind 001/002.
+- **AI Toggle Switch (Admin Panel):** Thêm nút gạt Bật/Tắt AI ngay trong khung chat của Admin Panel. 
+  - Admin có quyền can thiệp và tắt AI bất cứ lúc nào để chuyển sang chat 1-1.
+  - Trạng thái AI được đồng bộ realtime qua Firebase (`aiMode`).
+- **Robust JSON Parsing:** Cải tiến logic xử lý phản hồi từ AI trong Cloudflare Worker:
+  - Tự động bóc tách JSON khỏi markdown code blocks (```json).
+  - Loại bỏ các ký tự rác giúp ngăn lỗi hiển thị `{"reply":...}` thô trên màn hình khách hàng.
+  - Tăng `max_tokens` lên 450 để AI trả lời đầy đủ, không bị cắt cụt.
+- **Welcome Message Update:** Cập nhật tin nhắn chào mừng (Welcome Message) tự động bằng tiếng Thái, giới thiệu Nike Bot và hướng dẫn khách cách gọi nhân viên bằng từ khóa ("ขอคุยกับพนักงาน").
+- **Fix Bug (Syntax Error):** Sửa lỗi widget crash do sử dụng xuống dòng thật trong chuỗi JS (Fix bằng cách dùng `\n` escape sequences).
+
 ---
-*Ghi chú: File này sẽ được cập nhật liên tục trong quá trình phát triển để AI và người dùng luôn đồng bộ bối cảnh dự án.*
+*Ghi chú: File này được cập nhật vào lúc 17:05 ngày 24/04/2026 bởi Antigravity AI.*

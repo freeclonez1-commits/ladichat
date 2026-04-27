@@ -1,0 +1,184 @@
+<div id="nike-cancel-widget">
+  <style>
+    #nike-cancel-widget {
+      box-sizing: border-box;
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #111;
+      width: 100%;
+      max-width: 960px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 40px 20px;
+    }
+    #nike-cancel-widget *, #nike-cancel-widget *::before, #nike-cancel-widget *::after {
+      box-sizing: border-box;
+    }
+    .nike-help-header {
+      margin-bottom: 32px;
+    }
+    .nike-help-header h1 {
+      font-size: 28px;
+      font-weight: 500;
+      margin: 0 0 16px 0;
+      letter-spacing: -0.5px;
+    }
+    .nike-help-intro {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #444;
+      margin-bottom: 24px;
+    }
+    .nike-cancel-faq {
+      border-top: 1px solid #e5e5e5;
+    }
+    .nike-faq-item {
+      padding: 24px 0;
+      border-bottom: 1px solid #e5e5e5;
+    }
+    .nike-faq-question {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      line-height: 1.4;
+    }
+    .nike-faq-icon svg {
+      width: 20px;
+      height: 20px;
+      transition: transform 0.3s ease;
+      fill: none;
+      stroke: #111;
+      stroke-width: 2;
+    }
+    .nike-faq-answer {
+      display: block; /* Mặc định show thông tin theo yêu cầu của bạn */
+      padding-top: 16px;
+      font-size: 15px;
+      color: #333;
+      line-height: 1.7;
+    }
+    .nike-faq-answer p {
+      margin: 0 0 12px 0;
+    }
+    .nike-faq-answer ul {
+      margin: 0 0 12px 20px;
+      padding: 0;
+    }
+    .nike-faq-answer li {
+      margin-bottom: 8px;
+    }
+    .nike-faq-item.is-closed .nike-faq-answer {
+      display: none;
+    }
+    .nike-faq-item.is-closed .nike-faq-icon svg {
+      transform: rotate(-90deg);
+    }
+    .nike-faq-item:not(.is-closed) .nike-faq-icon svg {
+      transform: rotate(0deg);
+    }
+    
+    @media (max-width: 768px) {
+      #nike-cancel-widget {
+        padding: 20px 15px;
+      }
+      .nike-help-header h1 {
+        font-size: 24px;
+      }
+    }
+  </style>
+
+  <div class="nike-help-header">
+    <h1>ยกเลิกหรือเปลี่ยนแปลงคำสั่งซื้อ</h1>
+    <div class="nike-help-intro">
+      <p>เนื่องจากระบบของเราดำเนินการตามคำสั่งซื้ออย่างรวดเร็วเพื่อให้สินค้าถึงมือคุณโดยเร็วที่สุด เราจึงมีระยะเวลาที่จำกัดในการยกเลิกหรือเปลี่ยนแปลงข้อมูล</p>
+    </div>
+  </div>
+
+  <div class="nike-cancel-faq">
+    <!-- Item 1 -->
+    <div class="nike-faq-item">
+      <div class="nike-faq-question">
+        ฉันสามารถยกเลิกคำสั่งซื้อได้ภายในระยะเวลาเท่าใด?
+        <span class="nike-faq-icon">
+          <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </span>
+      </div>
+      <div class="nike-faq-answer">
+        <p>คุณสามารถยกเลิกคำสั่งซื้อได้ภายใน <strong>15 นาที</strong> หลังจากทำการสั่งซื้อสำเร็จ หากเกินระยะเวลานี้ระบบจะส่งข้อมูลไปยังแผนกจัดเตรียมสินค้าทันทีและจะไม่สามารถยกเลิกได้</p>
+        <p>วิธีการยกเลิก:</p>
+        <ul>
+          <li>ไปที่ "สถานะคำสั่งซื้อ" ของคุณ</li>
+          <li>ตรวจสอบว่ายังมีปุ่ม "ยกเลิกคำสั่งซื้อ" ปรากฏอยู่หรือไม่</li>
+          <li>คลิกปุ่มเพื่อดำเนินการยกเลิกและรอรับอีเมลยืนยัน</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Item 2 -->
+    <div class="nike-faq-item">
+      <div class="nike-faq-question">
+        ฉันสามารถแก้ไขที่อยู่จัดส่งหรือรายละเอียดสินค้าได้ไหม?
+        <span class="nike-faq-icon">
+          <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </span>
+      </div>
+      <div class="nike-faq-answer">
+        <p>เราไม่สามารถแก้ไขที่อยู่ ไซส์ สี หรือจำนวนสินค้าหลังจากคำสั่งซื้อถูกยืนยันแล้วได้ เพื่อความถูกต้องและรวดเร็ว:</p>
+        <ul>
+          <li>หากยังอยู่ในช่วง 15 นาทีแรก แนะนำให้ยกเลิกคำสั่งซื้อเดิมแล้วสั่งใหม่</li>
+          <li>หากเกิน 15 นาทีแล้ว คุณสามารถรอรับสินค้าและดำเนินการ "คืนสินค้า" เพื่อเปลี่ยนเป็นรายการที่ถูกต้องในภายหลัง</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Item 3 -->
+    <div class="nike-faq-item">
+      <div class="nike-faq-question">
+        การคืนเงินหลังจากการยกเลิกใช้เวลานานเท่าใด?
+        <span class="nike-faq-icon">
+          <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </span>
+      </div>
+      <div class="nike-faq-answer">
+        <p>หากคุณยกเลิกคำสั่งซื้อสำเร็จ:</p>
+        <ul>
+          <li>ยอดเงินที่ธนาคารทำการกันไว้ (Authorization Hold) จะถูกปลดล็อกโดยอัตโนมัติ</li>
+          <li>โดยปกติจะใช้เวลาประมาณ <strong>24-48 ชั่วโมง</strong> (ไม่รวมวันหยุด) ขึ้นอยู่กับนโยบายของแต่ละธนาคาร</li>
+          <li>คุณจะไม่ถูกเรียกเก็บเงินจริงสำหรับรายการที่ยกเลิกสำเร็จ</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Item 4 -->
+    <div class="nike-faq-item">
+      <div class="nike-faq-question">
+        ทำไมฉันถึงไม่เห็นปุ่มยกเลิกคำสั่งซื้อ?
+        <span class="nike-faq-icon">
+          <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"></polyline></svg>
+        </span>
+      </div>
+      <div class="nike-faq-answer">
+        <p>หากไม่มีปุ่มยกเลิกปรากฏขึ้น อาจเกิดจากสาเหตุดังนี้:</p>
+        <ul>
+          <li>ระยะเวลา 15 นาทีทองได้ผ่านพ้นไปแล้ว</li>
+          <li>คำสั่งซื้อของคุณได้เข้าสู่กระบวนการแพ็คสินค้าหรือกำลังเตรียมจัดส่ง</li>
+          <li>ในกรณีนี้ คุณจะไม่สามารถยกเลิกผ่านระบบหรือผ่านเจ้าหน้าที่ฝ่ายบริการลูกค้าได้</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const faqItems = document.querySelectorAll('#nike-cancel-widget .nike-faq-question');
+    
+    faqItems.forEach(question => {
+      question.addEventListener('click', () => {
+        const item = question.parentElement;
+        item.classList.toggle('is-closed');
+      });
+    });
+  </script>
+</div>

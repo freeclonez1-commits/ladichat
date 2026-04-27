@@ -43,6 +43,18 @@ input,textarea,select{font-family:var(--font)}
 .sb-logout{background:none;border:none;color:rgba(255,255,255,.5);font-size:14px;padding:4px;border-radius:4px;line-height:1;transition:.2s}
 .sb-logout:hover{color:#fff}
 
+/* GLOBAL AI TOGGLE (Sidebar Header) */
+.global-ai-wrap{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);flex-shrink:0}
+.global-ai-lbl{font-size:9px;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.5px;text-transform:uppercase}
+.global-ai-btn{position:relative;width:34px;height:18px;border-radius:99px;border:none;cursor:pointer;transition:background .25s;flex-shrink:0;padding:0}
+.global-ai-btn.on{background:#22c55e}
+.global-ai-btn.off{background:#555}
+.global-ai-btn::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.global-ai-btn.on::after{transform:translateX(16px)}
+.global-ai-status{font-size:9px;font-weight:800;letter-spacing:.3px;min-width:22px}
+.global-ai-status.on{color:#22c55e}
+.global-ai-status.off{color:#888}
+
 /* TABS */
 #sidebar-tabs{display:flex;border-bottom:1px solid var(--c-border);flex-shrink:0;background:var(--c-side)}
 .stab{flex:1;padding:11px 4px;text-align:center;font-size:11px;font-weight:700;cursor:pointer;color:var(--c-text3);border-bottom:2px solid transparent;transition:.2s;letter-spacing:.5px;text-transform:uppercase}
@@ -190,6 +202,12 @@ input,textarea,select{font-family:var(--font)}
         <span id="conv-count">0 hội thoại</span>
       </div>
       <div id="online-dot"></div>
+      <!-- GLOBAL AI TOGGLE -->
+      <div class="global-ai-wrap" title="Bật/Tắt AI Bot cho toàn bộ khách hàng">
+        <span class="global-ai-lbl">AI</span>
+        <button class="global-ai-btn off" id="global-ai-btn" onclick="toggleGlobalAI()"></button>
+        <span class="global-ai-status off" id="global-ai-status">OFF</span>
+      </div>
       <button class="sb-logout" onclick="doLogout()" title="Đăng xuất">⏻</button>
     </div>
 
@@ -313,7 +331,7 @@ function playAdminSound() {
     o.connect(g); g.connect(adminAudioCtx.destination);
     o.type = 'sine'; o.frequency.setValueAtTime(880, adminAudioCtx.currentTime);
     o.frequency.exponentialRampToValueAtTime(440, adminAudioCtx.currentTime + 0.15);
-    g.gain.setValueAtTime(0.3, adminAudioCtx.currentTime);
+    g.gain.setValueAtTime(0.07, adminAudioCtx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.001, adminAudioCtx.currentTime + 0.4);
     o.start(); o.stop(adminAudioCtx.currentTime + 0.4);
   } catch(e) {}
@@ -384,6 +402,43 @@ function initAdmin() {
 
   loadQrList();
   loadSettings();
+  listenGlobalAIMode();
+}
+
+// --- GLOBAL AI MODE ---
+function listenGlobalAIMode() {
+  db.ref('nike-chat/globalAIMode').on('value', (snap) => {
+    const isOn = snap.val() !== false; // mặc định true nếu chưa set
+    const btn = document.getElementById('global-ai-btn');
+    const txt = document.getElementById('global-ai-status');
+    if (!btn) return;
+    btn.className = 'global-ai-btn ' + (isOn ? 'on' : 'off');
+    txt.className  = 'global-ai-status ' + (isOn ? 'on' : 'off');
+    txt.textContent = isOn ? 'ON' : 'OFF';
+  });
+}
+
+function toggleGlobalAI() {
+  db.ref('nike-chat/globalAIMode').once('value', (snap) => {
+    const current = snap.val() !== false;
+    const next = !current;
+    db.ref('nike-chat/globalAIMode').set(next);
+    // Thêm system message vào tất cả conversations đang active nếu tắt
+    if (!next) {
+      db.ref('nike-chat/conversations').once('value', (cSnap) => {
+        const convs = cSnap.val() || {};
+        Object.keys(convs).forEach(sid => {
+          if (convs[sid].aiMode) {
+            db.ref(`nike-chat/conversations/${sid}/messages`).push({
+              sender: 'system',
+              text: '— Admin đã tắt AI Bot toàn hệ thống. Nhân viên sẽ hỗ trợ bạn —',
+              timestamp: Date.now()
+            });
+          }
+        });
+      });
+    }
+  });
 }
 
 // --- TAB SWITCH ---
