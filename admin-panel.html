@@ -162,6 +162,26 @@ input,textarea,select{font-family:var(--font)}
 #send-reply-btn{width:42px;height:42px;background:var(--c-text);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:.2s;font-size:16px}
 #send-reply-btn:hover{background:var(--c-red)}
 
+/* DELETE BUTTON */
+#delete-conv-btn{background:none;border:1.5px solid #fca5a5;color:#ef4444;border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px;transition:.2s;flex-shrink:0;letter-spacing:.3px}
+#delete-conv-btn:hover{background:#fee2e2;border-color:#ef4444}
+
+/* DELETE CONFIRM MODAL */
+#delete-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000;display:none;align-items:center;justify-content:center;backdrop-filter:blur(2px)}
+#delete-modal-overlay.show{display:flex}
+#delete-modal{background:#fff;border-radius:20px;padding:32px;width:360px;box-shadow:0 24px 64px rgba(0,0,0,.2);text-align:center;animation:modalPop .25s cubic-bezier(.34,1.56,.64,1)}
+@keyframes modalPop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.dm-icon{font-size:48px;line-height:1;margin-bottom:12px}
+.dm-title{font-size:18px;font-weight:900;color:#111;letter-spacing:-.3px;margin-bottom:8px}
+.dm-sub{font-size:13px;color:#666;line-height:1.6;margin-bottom:8px}
+.dm-name{font-size:14px;font-weight:800;color:#ef4444;background:#fff5f5;border:1px solid #fca5a5;border-radius:8px;padding:6px 14px;display:inline-block;margin-bottom:20px}
+.dm-actions{display:flex;gap:10px}
+.dm-cancel{flex:1;padding:12px;background:#f5f5f5;color:#555;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.dm-cancel:hover{background:#e5e5e5}
+.dm-confirm{flex:1;padding:12px;background:#ef4444;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.dm-confirm:hover{background:#dc2626}
+.dm-confirm.loading{opacity:.7;pointer-events:none}
+
 /* CONV COUNT BADGE */
 #conv-count{background:rgba(99,102,241,.2);color:var(--c-accent);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.3px}
 
@@ -295,12 +315,16 @@ input,textarea,select{font-family:var(--font)}
           <div id="chat-header-name"></div>
           <div id="chat-header-sub"></div>
         </div>
-        <!-- PER-SESSION AI TOGGLE -->
+        <!-- PER-SESSION AI TOGGLE (hidden) -->
         <div class="ai-toggle-wrap" id="ai-toggle-wrap" style="display:none" title="Bật/Tắt AI cho hội thoại này">
           <span class="ai-toggle-label">🤖 AI</span>
           <button class="ai-toggle-btn off" id="ai-toggle-btn" onclick="toggleAIMode()"></button>
           <span class="ai-status-txt off" id="ai-status-txt">TẮT</span>
         </div>
+        <!-- DELETE BUTTON -->
+        <button id="delete-conv-btn" onclick="confirmDeleteConv()" title="Xóa hội thoại này">
+          🗑️ Xóa
+        </button>
       </div>
       <div id="chat-messages"></div>
       <div id="chat-seen-status"></div>
@@ -310,6 +334,22 @@ input,textarea,select{font-family:var(--font)}
           oninput="autoResize(this)"></textarea>
         <button id="send-reply-btn" onclick="sendReply()">➤</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="delete-modal-overlay">
+  <div id="delete-modal">
+    <div class="dm-icon">🗑️</div>
+    <div class="dm-title">Xóa hội thoại?</div>
+    <div class="dm-sub">Hành động này sẽ xóa toàn bộ lịch sử tin nhắn của</div>
+    <div class="dm-name" id="dm-conv-name">Khách hàng</div>
+    <div class="dm-actions">
+      <button class="dm-cancel" onclick="cancelDeleteConv()">Hủy bỏ</button>
+      <button class="dm-confirm" id="dm-confirm-btn" onclick="executeDeleteConv()">
+        🗑️ Xác nhận xóa
+      </button>
     </div>
   </div>
 </div>
@@ -799,6 +839,57 @@ function autoResize(el) {
   el.style.height = 'auto';
   el.style.height = Math.min(el.scrollHeight, 120) + 'px';
 }
+
+// =============================================
+// 🗑️ DELETE CONVERSATION
+// =============================================
+function confirmDeleteConv() {
+  if (!activeSessionId || !allConvs[activeSessionId]) return;
+  const conv = allConvs[activeSessionId];
+  const name = conv.customerName || 'Khách hàng';
+  document.getElementById('dm-conv-name').textContent = name;
+  const btn = document.getElementById('dm-confirm-btn');
+  btn.classList.remove('loading');
+  btn.innerHTML = '🗑️ Xác nhận xóa';
+  document.getElementById('delete-modal-overlay').classList.add('show');
+}
+
+function cancelDeleteConv() {
+  document.getElementById('delete-modal-overlay').classList.remove('show');
+}
+
+function executeDeleteConv() {
+  if (!activeSessionId) return;
+  const btn = document.getElementById('dm-confirm-btn');
+  btn.classList.add('loading');
+  btn.innerHTML = '⏳ Đang xóa...';
+
+  const sidToDelete = activeSessionId;
+  db.ref(`${DB_PATH}/${sidToDelete}`).remove()
+    .then(() => {
+      // Xóa thành công
+      cancelDeleteConv();
+      // Reset giao diện
+      activeSessionId = null;
+      document.getElementById('chat-placeholder').style.display = 'flex';
+      document.getElementById('chat-main').style.display = 'none';
+      document.getElementById('chat-messages').innerHTML = '';
+      // Xóa khỏi allConvs local
+      delete allConvs[sidToDelete];
+      renderConvList(allConvs);
+    })
+    .catch((err) => {
+      btn.classList.remove('loading');
+      btn.innerHTML = '🗑️ Xác nhận xóa';
+      alert('Lỗi khi xóa: ' + err.message);
+    });
+}
+
+// Đóng modal khi click ra ngoài
+document.getElementById('delete-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) cancelDeleteConv();
+});
+
 </script>
 </body>
 </html>
