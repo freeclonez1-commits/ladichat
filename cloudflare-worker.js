@@ -15,11 +15,6 @@ const ALLOWED_ORIGINS = [
   'https://www.nike-mind.online',
   'http://www.nike-mind.online',
   'https://freeclonez1-commits.github.io',
-  // LadiPage domains
-  'https://demo.ladipage.me',
-  'http://demo.ladipage.me',
-  'https://ladipage.me',
-  'http://ladipage.me',
 ];
 
 const rateLimitMap = new Map();
