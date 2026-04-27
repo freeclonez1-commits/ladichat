@@ -218,8 +218,8 @@ input,textarea,select{font-family:var(--font)}
       <div class="stab" onclick="switchTab('settings')" id="tab-settings">⚙️ Cài đặt</div>
     </div>
 
-    <!-- GLOBAL AI BAR — entire div is clickable -->
-    <div id="global-ai-bar" onclick="toggleGlobalAI()" role="button" tabindex="0">
+    <!-- GLOBAL AI BAR — click handler registered via addEventListener in JS -->
+    <div id="global-ai-bar" role="button" tabindex="0">
       <div class="gai-left">
         <span class="gai-icon">🤖</span>
         <div>
@@ -418,6 +418,13 @@ function initAdmin() {
   loadQrList();
   loadSettings();
   listenGlobalAIMode();
+
+  // Attach click handler after Firebase is ready
+  const aiBar = document.getElementById('global-ai-bar');
+  if (aiBar) {
+    aiBar.addEventListener('click', toggleGlobalAI);
+    aiBar.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') toggleGlobalAI(); });
+  }
 }
 
 // --- GLOBAL AI MODE ---
@@ -434,13 +441,15 @@ function listenGlobalAIMode() {
 }
 
 function toggleGlobalAI() {
-  const btn = document.getElementById('global-ai-btn');
-  if (btn) btn.style.opacity = '0.5'; // visual feedback
+  console.log('[LadiChat] toggleGlobalAI called');
+  const aiBar = document.getElementById('global-ai-bar');
+  if (aiBar) aiBar.style.opacity = '0.6';
   db.ref('nike-chat/globalAIMode').once('value', (snap) => {
     const current = snap.val() !== false;
     const next = !current;
     db.ref('nike-chat/globalAIMode').set(next).then(() => {
-      if (btn) btn.style.opacity = '1';
+      if (aiBar) aiBar.style.opacity = '1';
+      console.log('[LadiChat] globalAIMode set to', next);
     });
     if (!next) {
       // Broadcast system message to all active conversations
