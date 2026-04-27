@@ -40,20 +40,25 @@ input,textarea,select{font-family:var(--font)}
 #sidebar-header h1{color:#fff;font-size:14px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;flex:1}
 #sidebar-header span{color:rgba(255,255,255,.5);font-size:10px;display:block;margin-top:1px}
 #online-dot{width:7px;height:7px;border-radius:50%;background:var(--c-green);box-shadow:0 0 0 2px rgba(34,197,94,.2);flex-shrink:0}
-.sb-logout{background:none;border:none;color:rgba(255,255,255,.5);font-size:14px;padding:4px;border-radius:4px;line-height:1;transition:.2s}
-.sb-logout:hover{color:#fff}
+.sb-logout{background:none;border:none;color:rgba(255,255,255,.5);font-size:18px;padding:4px 6px;border-radius:4px;line-height:1;transition:.2s}
+.sb-logout:hover{color:#fff;background:rgba(255,255,255,.1)}
 
-/* GLOBAL AI TOGGLE (Sidebar Header) */
-.global-ai-wrap{display:flex;align-items:center;gap:5px;padding:3px 8px;border-radius:20px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);flex-shrink:0}
-.global-ai-lbl{font-size:9px;font-weight:800;color:rgba(255,255,255,.6);letter-spacing:.5px;text-transform:uppercase}
-.global-ai-btn{position:relative;width:34px;height:18px;border-radius:99px;border:none;cursor:pointer;transition:background .25s;flex-shrink:0;padding:0}
-.global-ai-btn.on{background:#22c55e}
-.global-ai-btn.off{background:#555}
-.global-ai-btn::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.global-ai-btn.on::after{transform:translateX(16px)}
-.global-ai-status{font-size:9px;font-weight:800;letter-spacing:.3px;min-width:22px}
-.global-ai-status.on{color:#22c55e}
-.global-ai-status.off{color:#888}
+/* GLOBAL AI BAR (dưới tabs) */
+#global-ai-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(135deg,#0f172a,#1e293b);border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+.gai-left{display:flex;align-items:center;gap:10px}
+.gai-icon{font-size:20px;line-height:1}
+.gai-title{font-size:12px;font-weight:800;color:#fff;letter-spacing:.2px;line-height:1.2}
+.gai-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;font-weight:500}
+/* Switch toggle */
+.gai-switch{display:flex;align-items:center;gap:8px}
+.gai-pill{position:relative;width:48px;height:26px;border-radius:99px;border:none;cursor:pointer;transition:background .3s,box-shadow .3s;padding:0;flex-shrink:0;outline:none}
+.gai-pill.on{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25)}
+.gai-pill.off{background:#374151;box-shadow:none}
+.gai-pill::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.gai-pill.on::after{transform:translateX(22px)}
+.gai-badge{font-size:11px;font-weight:900;letter-spacing:.5px;min-width:26px;text-align:right}
+.gai-badge.on{color:#4ade80}
+.gai-badge.off{color:#6b7280}
 
 /* TABS */
 #sidebar-tabs{display:flex;border-bottom:1px solid var(--c-border);flex-shrink:0;background:var(--c-side)}
@@ -159,17 +164,17 @@ input,textarea,select{font-family:var(--font)}
 /* CONV COUNT BADGE */
 #conv-count{background:rgba(99,102,241,.2);color:var(--c-accent);font-size:10px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.3px}
 
-/* AI TOGGLE */
-.ai-toggle-wrap{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0}
-.ai-toggle-label{font-size:11px;font-weight:700;letter-spacing:.3px;color:#fff;opacity:.75}
-.ai-toggle-btn{position:relative;width:42px;height:23px;border-radius:99px;border:none;cursor:pointer;transition:background .25s;flex-shrink:0;padding:0}
-.ai-toggle-btn.on{background:#22c55e}
-.ai-toggle-btn.off{background:#555}
-.ai-toggle-btn::after{content:'';position:absolute;top:3px;left:3px;width:17px;height:17px;border-radius:50%;background:#fff;transition:transform .25s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
-.ai-toggle-btn.on::after{transform:translateX(19px)}
-.ai-status-txt{font-size:10px;font-weight:800;letter-spacing:.5px}
-.ai-status-txt.on{color:#22c55e}
-.ai-status-txt.off{color:#888}
+/* PER-SESSION AI TOGGLE (in chat header - white bg) */
+.ai-toggle-wrap{display:flex;align-items:center;gap:6px;margin-left:auto;flex-shrink:0;background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:12px;padding:6px 12px}
+.ai-toggle-label{font-size:11px;font-weight:700;letter-spacing:.2px;color:#374151}
+.ai-toggle-btn{position:relative;width:40px;height:22px;border-radius:99px;border:none;cursor:pointer;transition:background .25s,box-shadow .2s;flex-shrink:0;padding:0;outline:none}
+.ai-toggle-btn.on{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.ai-toggle-btn.off{background:#d1d5db;box-shadow:none}
+.ai-toggle-btn::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .25s cubic-bezier(.34,1.56,.64,1);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.ai-toggle-btn.on::after{transform:translateX(18px)}
+.ai-status-txt{font-size:10px;font-weight:800;letter-spacing:.5px;min-width:24px}
+.ai-status-txt.on{color:#16a34a}
+.ai-status-txt.off{color:#9ca3af}
 .msg-ai-badge{font-size:9px;color:#10b981;font-weight:700;display:flex;align-items:center;gap:3px;margin-bottom:3px;letter-spacing:.3px}
 
 ::-webkit-scrollbar{width:4px}
@@ -197,17 +202,11 @@ input,textarea,select{font-family:var(--font)}
   <div id="sidebar">
     <div id="sidebar-header">
       <img src="https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg" alt="Nike">
-      <div>
+      <div style="flex:1;min-width:0">
         <h1>Support Nike</h1>
         <span id="conv-count">0 hội thoại</span>
       </div>
       <div id="online-dot"></div>
-      <!-- GLOBAL AI TOGGLE -->
-      <div class="global-ai-wrap" title="Bật/Tắt AI Bot cho toàn bộ khách hàng">
-        <span class="global-ai-lbl">AI</span>
-        <button class="global-ai-btn off" id="global-ai-btn" onclick="toggleGlobalAI()"></button>
-        <span class="global-ai-status off" id="global-ai-status">OFF</span>
-      </div>
       <button class="sb-logout" onclick="doLogout()" title="Đăng xuất">⏻</button>
     </div>
 
@@ -216,6 +215,21 @@ input,textarea,select{font-family:var(--font)}
       <div class="stab active" onclick="switchTab('convs')" id="tab-convs">💬 Hội thoại</div>
       <div class="stab" onclick="switchTab('qr')" id="tab-qr">⚡ Quick Replies</div>
       <div class="stab" onclick="switchTab('settings')" id="tab-settings">⚙️ Cài đặt</div>
+    </div>
+
+    <!-- GLOBAL AI BAR -->
+    <div id="global-ai-bar">
+      <div class="gai-left">
+        <span class="gai-icon">🤖</span>
+        <div>
+          <div class="gai-title">AI Auto-Reply</div>
+          <div class="gai-sub">Áp dụng cho tất cả khách hàng</div>
+        </div>
+      </div>
+      <div class="gai-switch">
+        <button class="gai-pill off" id="global-ai-btn" onclick="toggleGlobalAI()" title="Bật/Tắt AI Bot toàn hệ thống"></button>
+        <span class="gai-badge off" id="global-ai-status">OFF</span>
+      </div>
     </div>
 
     <!-- CONVERSATIONS TAB -->
@@ -280,10 +294,10 @@ input,textarea,select{font-family:var(--font)}
           <div id="chat-header-name"></div>
           <div id="chat-header-sub"></div>
         </div>
-        <!-- AI TOGGLE -->
-        <div class="ai-toggle-wrap" id="ai-toggle-wrap" style="display:none">
-          <span class="ai-toggle-label">🤖 AI Bot</span>
-          <button class="ai-toggle-btn off" id="ai-toggle-btn" onclick="toggleAIMode()" title="Bật/Tắt AI Bot"></button>
+        <!-- PER-SESSION AI TOGGLE -->
+        <div class="ai-toggle-wrap" id="ai-toggle-wrap" style="display:none" title="Bật/Tắt AI cho hội thoại này">
+          <span class="ai-toggle-label">🤖 AI</span>
+          <button class="ai-toggle-btn off" id="ai-toggle-btn" onclick="toggleAIMode()"></button>
           <span class="ai-status-txt off" id="ai-status-txt">TẮT</span>
         </div>
       </div>
@@ -408,23 +422,27 @@ function initAdmin() {
 // --- GLOBAL AI MODE ---
 function listenGlobalAIMode() {
   db.ref('nike-chat/globalAIMode').on('value', (snap) => {
-    const isOn = snap.val() !== false; // mặc định true nếu chưa set
+    const isOn = snap.val() !== false;
     const btn = document.getElementById('global-ai-btn');
     const txt = document.getElementById('global-ai-status');
     if (!btn) return;
-    btn.className = 'global-ai-btn ' + (isOn ? 'on' : 'off');
-    txt.className  = 'global-ai-status ' + (isOn ? 'on' : 'off');
+    btn.className = 'gai-pill ' + (isOn ? 'on' : 'off');
+    txt.className  = 'gai-badge ' + (isOn ? 'on' : 'off');
     txt.textContent = isOn ? 'ON' : 'OFF';
   });
 }
 
 function toggleGlobalAI() {
+  const btn = document.getElementById('global-ai-btn');
+  if (btn) btn.style.opacity = '0.5'; // visual feedback
   db.ref('nike-chat/globalAIMode').once('value', (snap) => {
     const current = snap.val() !== false;
     const next = !current;
-    db.ref('nike-chat/globalAIMode').set(next);
-    // Thêm system message vào tất cả conversations đang active nếu tắt
+    db.ref('nike-chat/globalAIMode').set(next).then(() => {
+      if (btn) btn.style.opacity = '1';
+    });
     if (!next) {
+      // Broadcast system message to all active conversations
       db.ref('nike-chat/conversations').once('value', (cSnap) => {
         const convs = cSnap.val() || {};
         Object.keys(convs).forEach(sid => {
