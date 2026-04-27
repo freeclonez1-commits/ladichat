@@ -27,7 +27,7 @@
     logoUrl: 'https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg',
     greetingText: 'สวัสดี! รองเท้า Nike Mind สนใจมั้ย? 👋',
     welcomeMsg: function(name) {
-      return '\u0e2a\u0e27\u0e31\u0e2a\u0e14\u0e35\u0e04\u0e38\u0e13 ' + name + '! \ud83d\ude0a\n\n\u0e09\u0e31\u0e19\u0e0a\u0e37\u0e48\u0e2d Nike Bot \u0e40\u0e1b\u0e47\u0e19\u0e1c\u0e39\u0e49\u0e0a\u0e48\u0e27\u0e22 AI \u0e02\u0e2d\u0e07\u0e23\u0e49\u0e32\u0e19 Nike Mind \u0e0a\u0e48\u0e27\u0e22\u0e15\u0e2d\u0e1a\u0e04\u0e33\u0e16\u0e32\u0e21\u0e40\u0e01\u0e35\u0e48\u0e22\u0e27\u0e01\u0e31\u0e1a\u0e2a\u0e34\u0e19\u0e04\u0e49\u0e32 \u0e23\u0e32\u0e04\u0e32 \u0e41\u0e25\u0e30\u0e01\u0e32\u0e23\u0e2a\u0e31\u0e48\u0e07\u0e0b\u0e37\u0e49\u0e2d\u0e44\u0e14\u0e49\u0e40\u0e25\u0e22\u0e04\u0e48\u0e30\n\n\u0e16\u0e49\u0e32\u0e15\u0e49\u0e2d\u0e07\u0e01\u0e32\u0e23\u0e04\u0e38\u0e22\u0e01\u0e31\u0e1a\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19\u0e08\u0e23\u0e34\u0e07 \u0e41\u0e04\u0e48\u0e1e\u0e34\u0e21\u0e1e\u0e4c\u0e27\u0e48\u0e32 "\u0e02\u0e2d\u0e04\u0e38\u0e22\u0e01\u0e31\u0e1a\u0e1e\u0e19\u0e31\u0e01\u0e07\u0e32\u0e19" \u0e44\u0e14\u0e49\u0e40\u0e25\u0e22\u0e19\u0e30\u0e04\u0e30 \ud83d\ude4f';
+      return 'ยินดีต้อนรับคุณ ' + name + ' สู่ Nike ค่ะ 🙏\n\nขอบคุณที่ให้ความสนใจในสินค้าและบริการของเราค่ะ\n\nทีมที่ปรึกษาของเราจะตอบกลับข้อความของคุณในไม่ช้านี้\n\nกรุณาฝากคำถามหรือข้อมูลที่ต้องการความช่วยเหลือไว้ที่นี่ได้เลยนะคะ';
     }
   };
   // ===================================================
@@ -318,7 +318,7 @@
       aiMode: false  // mặc định chat 1-1, không dùng AI
     });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({
-      sender: 'admin', text: CFG.welcomeMsg(name), timestamp: Date.now(), isAI: true
+      sender: 'admin', text: CFG.welcomeMsg(name), timestamp: Date.now()
     });
     document.getElementById('nk-ob').style.display = 'none';
     document.getElementById('nk-ci').style.display = 'flex';
@@ -463,7 +463,7 @@
       }
       var row = document.createElement('div');
       row.className = 'nk-mr ' + msg.sender;
-      var aiBadge = (msg.isAI && msg.sender === 'admin') ? '<div class="nk-ai-lbl">🤖 Nike Bot</div>' : '';
+      var aiBadge = ''; // Ẩn badge Nike Bot
       row.innerHTML = '<div>' + aiBadge + '<div class="nk-mb">' + nkE(msg.text) + '</div><div class="nk-mt">' + nkTime(msg.timestamp) + '</div></div>';
       msgs.appendChild(row);
       msgs.scrollTop = msgs.scrollHeight;
