@@ -44,17 +44,18 @@ input,textarea,select{font-family:var(--font)}
 .sb-logout:hover{color:#fff;background:rgba(255,255,255,.1)}
 
 /* GLOBAL AI BAR (dưới tabs) */
-#global-ai-bar{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:linear-gradient(135deg,#0f172a,#1e293b);border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
-.gai-left{display:flex;align-items:center;gap:10px}
-.gai-icon{font-size:20px;line-height:1}
+#global-ai-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:linear-gradient(135deg,#0f172a,#1e293b);border-bottom:2px solid rgba(255,255,255,.08);flex-shrink:0;cursor:pointer;user-select:none;position:relative;z-index:10;transition:opacity .15s}
+#global-ai-bar:hover{opacity:.9}
+.gai-left{display:flex;align-items:center;gap:10px;pointer-events:none;flex:1;min-width:0}
+.gai-icon{font-size:18px;line-height:1;flex-shrink:0}
 .gai-title{font-size:12px;font-weight:800;color:#fff;letter-spacing:.2px;line-height:1.2}
 .gai-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px;font-weight:500}
 /* Switch toggle */
-.gai-switch{display:flex;align-items:center;gap:8px}
-.gai-pill{position:relative;width:48px;height:26px;border-radius:99px;border:none;cursor:pointer;transition:background .3s,box-shadow .3s;padding:0;flex-shrink:0;outline:none}
+.gai-switch{display:flex;align-items:center;gap:8px;pointer-events:none;flex-shrink:0}
+.gai-pill{position:relative;width:46px;height:24px;border-radius:99px;transition:background .3s,box-shadow .3s;flex-shrink:0}
 .gai-pill.on{background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.25)}
 .gai-pill.off{background:#374151;box-shadow:none}
-.gai-pill::after{content:'';position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 4px rgba(0,0,0,.3)}
+.gai-pill::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 4px rgba(0,0,0,.3)}
 .gai-pill.on::after{transform:translateX(22px)}
 .gai-badge{font-size:11px;font-weight:900;letter-spacing:.5px;min-width:26px;text-align:right}
 .gai-badge.on{color:#4ade80}
@@ -217,8 +218,8 @@ input,textarea,select{font-family:var(--font)}
       <div class="stab" onclick="switchTab('settings')" id="tab-settings">⚙️ Cài đặt</div>
     </div>
 
-    <!-- GLOBAL AI BAR -->
-    <div id="global-ai-bar">
+    <!-- GLOBAL AI BAR — entire div is clickable -->
+    <div id="global-ai-bar" onclick="toggleGlobalAI()" role="button" tabindex="0">
       <div class="gai-left">
         <span class="gai-icon">🤖</span>
         <div>
@@ -227,7 +228,7 @@ input,textarea,select{font-family:var(--font)}
         </div>
       </div>
       <div class="gai-switch">
-        <button class="gai-pill off" id="global-ai-btn" onclick="toggleGlobalAI()" title="Bật/Tắt AI Bot toàn hệ thống"></button>
+        <div class="gai-pill off" id="global-ai-btn"></div>
         <span class="gai-badge off" id="global-ai-status">OFF</span>
       </div>
     </div>
