@@ -315,7 +315,7 @@
       customerName: name, customerPhone: phone,
       startedAt: Date.now(), lastMessageAt: Date.now(),
       lastMessage: 'Khách hàng bắt đầu hội thoại', unread: true,
-      aiMode: true  // bật AI Bot mặc định
+      aiMode: false  // mặc định chat 1-1, không dùng AI
     });
     NK.db.ref('nike-chat/conversations/' + NK.sessionId + '/messages').push({
       sender: 'admin', text: CFG.welcomeMsg(name), timestamp: Date.now(), isAI: true
